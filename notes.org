@@ -1,0 +1,41 @@
+# -*- mode: org; fill-column: 78; -*-
+# Time-stamp: <2023-12-28 14:58:55 krylon>
+#
+#+TAGS: internals(i) ui(u) bug(b) feature(f)
+#+TAGS: database(d) design(e), meditation(m)
+#+TAGS: optimize(o) refactor(r) cleanup(c)
+#+TODO: TODO(t)  RESEARCH(r) IMPLEMENT(i) TEST(e) | DONE(d) FAILED(f) CANCELLED(c)
+#+TODO: MEDITATE(m) PLANNING(p) | SUSPENDED(s)
+#+PRIORITIES: A G D
+
+* Wetterfrosch
+  Wetterfrosch is a small GUI application to fetch warnings from the public
+  German Weather Service (Deutscher Wetterdienst, [[https://www.dwd.de/][DWD]]) and display them.
+** Clocktable
+   #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
+   #+CAPTION: Clock summary at [2023-12-28 Do 14:58]
+   | Headline     | Time   |
+   |--------------+--------|
+   | *Total time* | *0:00* |
+   #+END:
+** Features
+** Components [0/2]
+  :PROPERTIES:
+  :COOKIE_DATA: todo recursive
+  :VISIBILITY: children
+  :END:
+*** TODO Load warnings from DWD
+*** GUI [0/1]
+   :PROPERTIES:
+   :COOKIE_DATA: todo recursive
+   :VISIBILITY: children
+   :END:
+**** RESEARCH Tray Icon
+*** Notifications [0/1]
+   :PROPERTIES:
+   :COOKIE_DATA: todo recursive
+   :VISIBILITY: children
+   :END:
+**** TODO Make some noise
+** Bugs
+
