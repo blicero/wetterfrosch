@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2023-12-28 14:58:55 krylon>
+# Time-stamp: <2023-12-30 16:27:32 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -25,6 +25,9 @@
   :VISIBILITY: children
   :END:
 *** TODO Load warnings from DWD
+    :LOGBOOK:
+    CLOCK: [2023-12-30 Sa 16:27]
+    :END:
 *** GUI [0/1]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
