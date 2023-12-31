@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2023-12-30 16:27:32 krylon>
+# Time-stamp: <2023-12-31 15:48:00 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -13,10 +13,14 @@
   German Weather Service (Deutscher Wetterdienst, [[https://www.dwd.de/][DWD]]) and display them.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2023-12-28 Do 14:58]
-   | Headline     | Time   |
-   |--------------+--------|
-   | *Total time* | *0:00* |
+   #+CAPTION: Clock summary at [2023-12-31 So 15:47]
+   | Headline                     | Time   |        |      |
+   |------------------------------+--------+--------+------|
+   | *Total time*                 | *2:07* |        |      |
+   |------------------------------+--------+--------+------|
+   | *Wetterfrosch*               | *2:07* |        |      |
+   | \_  /Components [0/2]/       |        | /2:07/ |      |
+   | \_    Load warnings from DWD |        |        | 2:07 |
    #+END:
 ** Features
 ** Components [0/2]
@@ -26,7 +30,7 @@
   :END:
 *** TODO Load warnings from DWD
     :LOGBOOK:
-    CLOCK: [2023-12-30 Sa 16:27]
+    CLOCK: [2023-12-30 Sa 16:27]--[2023-12-30 Sa 18:34] =>  2:07
     :END:
 *** GUI [0/1]
    :PROPERTIES:
