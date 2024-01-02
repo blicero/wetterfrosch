@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2023-12-29 17:29:05 krylon>
+# Time-stamp: <2024-01-02 19:32:19 krylon>
 #
 # /data/code/python/wetterfrosch/common.py
 # created on 29. 12. 2023
@@ -25,6 +25,7 @@ from threading import Lock
 APP_NAME: Final[str] = "Wetterfrosch"
 APP_VERSION: Final[str] = "0.0.1"
 DEBUG: Final[bool] = True
+TIME_FMT: Final[str] = "%Y-%m-%d %H:%M:%S"
 
 
 class Path:
