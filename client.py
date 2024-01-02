@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-02 18:53:21 krylon>
+# Time-stamp: <2024-01-02 19:32:39 krylon>
 #
 # /data/code/python/wetterfrosch/dwd.py
 # created on 28. 12. 2023
@@ -60,10 +60,17 @@ class Client:
 
     def fetch(self) -> Optional[dict]:
         """Fetch the current list of warnings from DWD."""
+        next_fetch = self.last_fetch + self.interval
+        if next_fetch > datetime.now():
+            self.log.info("Last fetch was %s, next fetch is not due until %s",
+                          self.last_fetch.strftime(common.TIME_FMT),
+                          next_fetch.strftime(common.TIME_FMT))
+            return None
         with urllib.request.urlopen(WARNINGS_URL) as res:
             if res.status != 200:
                 self.log.error("Failed to fetch data from DWD: %d", res.status)
                 return None
+            self.last_fetch = datetime.now()
             body: Final[str] = res.read().decode()
             m: Final[Optional[re.Match[str]]] = ENVELOPE_PAT.match(body)
             assert m is not None  # SRSLY?
