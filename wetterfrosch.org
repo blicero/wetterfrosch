@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2023-12-31 15:48:00 krylon>
+# Time-stamp: <2024-01-02 19:20:33 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -13,25 +13,36 @@
   German Weather Service (Deutscher Wetterdienst, [[https://www.dwd.de/][DWD]]) and display them.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2023-12-31 So 15:47]
-   | Headline                     | Time   |        |      |
-   |------------------------------+--------+--------+------|
-   | *Total time*                 | *2:07* |        |      |
-   |------------------------------+--------+--------+------|
-   | *Wetterfrosch*               | *2:07* |        |      |
-   | \_  /Components [0/2]/       |        | /2:07/ |      |
-   | \_    Load warnings from DWD |        |        | 2:07 |
+   #+CAPTION: Clock summary at [2024-01-02 Di 19:20]
+   | Headline                           | Time   |        |      |      |
+   |------------------------------------+--------+--------+------+------|
+   | *Total time*                       | *2:48* |        |      |      |
+   |------------------------------------+--------+--------+------+------|
+   | *Wetterfrosch*                     | *2:48* |        |      |      |
+   | \_  /Components [0/4]/             |        | /2:48/ |      |      |
+   | \_    Load warnings from DWD [1/1] |        |        | 2:48 |      |
+   | \_      Testing                    |        |        |      | 0:41 |
    #+END:
 ** Features
-** Components [0/2]
+** Components [0/4]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
   :VISIBILITY: children
   :END:
-*** TODO Load warnings from DWD
+*** TODO Load warnings from DWD [1/1]
+    :PROPERTIES:
+    :COOKIE_DATA: todo recursive
+    :VISIBILITY: children
+    :END:
     :LOGBOOK:
     CLOCK: [2023-12-30 Sa 16:27]--[2023-12-30 Sa 18:34] =>  2:07
     :END:
+**** DONE Testing
+     CLOSED: [2024-01-02 Di 19:19]
+     :LOGBOOK:
+     CLOCK: [2024-01-02 Di 18:43]--[2024-01-02 Di 19:19] =>  0:36
+     CLOCK: [2024-01-02 Di 18:23]--[2024-01-02 Di 18:28] =>  0:05
+     :END:
 *** GUI [0/1]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
