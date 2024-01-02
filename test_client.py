@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-02 19:19:14 krylon>
+# Time-stamp: <2024-01-02 19:37:58 krylon>
 #
 # /data/code/python/wetterfrosch/test_client.py
 # created on 02. 01. 2024
@@ -69,11 +69,14 @@ class ClientTest(unittest.TestCase):
         c: Optional[Client] = self.__class__.client()
         self.assertIsNotNone(c)
         try:
+            assert c is not None
             data: Optional[dict] = c.fetch()
             if data is not None:
                 res = c.process(data)
+                self.assertIsNotNone(res)
+                assert res is not None
                 self.assertGreaterEqual(len(res), len(data))
-        except Exception as e:
+        except Exception as e:  # pylint: disable-msg=W0718
             self.fail(f"Failed to fetch/parse data from DWD: {e}")
 
     def test_03_process_sample_data(self) -> None:
@@ -82,14 +85,15 @@ class ClientTest(unittest.TestCase):
         test_files: list[str] = ["example.json", "warnings.json"]
         c: Optional[Client] = self.__class__.client()
         self.assertIsNotNone(c)
+        assert c is not None
         print(f">>> Working directory is {os.getcwd()}")
         for f in test_files:
-            with open(f, 'r') as fh:
+            with open(f, 'r', encoding="utf-8") as fh:
                 try:
                     data = json.load(fh)
                     res = c.process(data)
                     self.assertIsNotNone(res)
-                except Exception as e:
+                except Exception as e:  # pylint: disable-msg=W0718
                     self.fail(f"Failed to process {f}: {e}")
 
 # Local Variables: #
