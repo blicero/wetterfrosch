@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-02 19:08:47 krylon>
+# Time-stamp: <2024-01-02 19:19:14 krylon>
 #
 # /data/code/python/wetterfrosch/test_client.py
 # created on 02. 01. 2024
@@ -16,6 +16,7 @@ wetterfrosch.test_client
 (c) 2024 Benjamin Walkenhorst
 """
 
+import json
 import os
 import unittest
 from datetime import datetime
@@ -74,6 +75,22 @@ class ClientTest(unittest.TestCase):
                 self.assertGreaterEqual(len(res), len(data))
         except Exception as e:
             self.fail(f"Failed to fetch/parse data from DWD: {e}")
+
+    def test_03_process_sample_data(self) -> None:
+        """Test prcessing the sample data.
+        This works even without a working Internet connection."""
+        test_files: list[str] = ["example.json", "warnings.json"]
+        c: Optional[Client] = self.__class__.client()
+        self.assertIsNotNone(c)
+        print(f">>> Working directory is {os.getcwd()}")
+        for f in test_files:
+            with open(f, 'r') as fh:
+                try:
+                    data = json.load(fh)
+                    res = c.process(data)
+                    self.assertIsNotNone(res)
+                except Exception as e:
+                    self.fail(f"Failed to process {f}: {e}")
 
 # Local Variables: #
 # python-indent: 4 #
