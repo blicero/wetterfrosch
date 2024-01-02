@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2023-12-30 17:32:25 krylon>
+# Time-stamp: <2024-01-02 18:53:21 krylon>
 #
 # /data/code/python/wetterfrosch/dwd.py
 # created on 28. 12. 2023
@@ -76,10 +76,13 @@ class Client:
         warnings: list[dict] = []
         for w in data["warnings"].values():
             for event in w:
-                for p in self.loc_patterns:
-                    if p.search(event["regionName"]) is not None:
-                        warnings.append(event)
-                        break
+                if len(self.loc_patterns) == 0:
+                    warnings.append(event)
+                else:
+                    for p in self.loc_patterns:
+                        if p.search(event["regionName"]) is not None:
+                            warnings.append(event)
+                            break
         return warnings
 
 
