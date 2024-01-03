@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-02 19:37:58 krylon>
+# Time-stamp: <2024-01-03 02:26:31 krylon>
 #
 # /data/code/python/wetterfrosch/test_client.py
 # created on 02. 01. 2024
@@ -61,12 +61,14 @@ class ClientTest(unittest.TestCase):
     def test_01_client_create(self) -> None:
         """Create a Client instance."""
         c: Optional[Client] = Client()
+        assert c is not None
         self.assertIsNotNone(c)
         self.__class__.client(c)
 
     def test_02_fetch_data(self) -> None:
         """Try to fetch data."""
         c: Optional[Client] = self.__class__.client()
+        assert c is not None
         self.assertIsNotNone(c)
         try:
             assert c is not None
@@ -84,11 +86,12 @@ class ClientTest(unittest.TestCase):
         This works even without a working Internet connection."""
         test_files: list[str] = ["example.json", "warnings.json"]
         c: Optional[Client] = self.__class__.client()
-        self.assertIsNotNone(c)
         assert c is not None
+        self.assertIsNotNone(c)
         print(f">>> Working directory is {os.getcwd()}")
         for f in test_files:
-            with open(f, 'r', encoding="utf-8") as fh:
+            path: str = os.path.join("wetterfrosch", f)
+            with open(path, 'r', encoding="utf-8") as fh:
                 try:
                     data = json.load(fh)
                     res = c.process(data)
