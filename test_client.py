@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-03 02:26:31 krylon>
+# Time-stamp: <2024-01-05 18:31:55 krylon>
 #
 # /data/code/python/wetterfrosch/test_client.py
 # created on 02. 01. 2024
@@ -88,9 +88,12 @@ class ClientTest(unittest.TestCase):
         c: Optional[Client] = self.__class__.client()
         assert c is not None
         self.assertIsNotNone(c)
-        print(f">>> Working directory is {os.getcwd()}")
+        cwd = os.getcwd()
+        print(f">>> Working directory is {cwd}")
         for f in test_files:
-            path: str = os.path.join("wetterfrosch", f)
+            path: str = f
+            if not cwd.endswith("wetterfrosch"):
+                path = os.path.join("wetterfrosch", f)
             with open(path, 'r', encoding="utf-8") as fh:
                 try:
                     data = json.load(fh)
