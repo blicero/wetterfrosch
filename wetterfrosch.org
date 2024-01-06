@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-01-05 18:35:37 krylon>
+# Time-stamp: <2024-01-06 20:25:16 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -13,16 +13,16 @@
   German Weather Service (Deutscher Wetterdienst, [[https://www.dwd.de/][DWD]]) and display them.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2024-01-05 Fr 18:35]
+   #+CAPTION: Clock summary at [2024-01-06 Sa 20:25]
    | Headline                           | Time   |        |      |      |
    |------------------------------------+--------+--------+------+------|
-   | *Total time*                       | *5:27* |        |      |      |
+   | *Total time*                       | *7:17* |        |      |      |
    |------------------------------------+--------+--------+------+------|
-   | *Wetterfrosch*                     | *5:27* |        |      |      |
-   | \_  /Components [0/4]/             |        | /5:27/ |      |      |
+   | *Wetterfrosch*                     | *7:17* |        |      |      |
+   | \_  /Components [0/4]/             |        | /7:17/ |      |      |
    | \_    Load warnings from DWD [1/1] |        |        | 2:48 |      |
    | \_      Testing                    |        |        |      | 0:41 |
-   | \_    GUI [0/1]                    |        |        | 2:39 |      |
+   | \_    GUI [0/1]                    |        |        | 4:29 |      |
    #+END:
 ** Features
 ** Components [0/4]
@@ -50,6 +50,8 @@
    :VISIBILITY: children
    :END:
    :LOGBOOK:
+   CLOCK: [2024-01-06 Sa 19:24]--[2024-01-06 Sa 20:25] =>  1:01
+   CLOCK: [2024-01-05 Fr 19:50]--[2024-01-05 Fr 20:39] =>  0:49
    CLOCK: [2024-01-05 Fr 18:00]--[2024-01-05 Fr 18:35] =>  0:35
    CLOCK: [2024-01-03 Mi 17:21]--[2024-01-03 Mi 19:15] =>  1:54
    CLOCK: [2024-01-02 Di 19:41]--[2024-01-02 Di 19:51] =>  0:10
