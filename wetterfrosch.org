@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-01-08 19:43:44 krylon>
+# Time-stamp: <2024-01-09 00:11:22 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -13,17 +13,18 @@
   German Weather Service (Deutscher Wetterdienst, [[https://www.dwd.de/][DWD]]) and display them.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2024-01-08 Mo 19:43]
-   | Headline                           | Time   |        |      |      |
-   |------------------------------------+--------+--------+------+------|
-   | *Total time*                       | *8:31* |        |      |      |
-   |------------------------------------+--------+--------+------+------|
-   | *Wetterfrosch*                     | *8:31* |        |      |      |
-   | \_  /Components [0/4]/             |        | /8:31/ |      |      |
-   | \_    Load warnings from DWD [1/1] |        |        | 2:48 |      |
-   | \_      Testing                    |        |        |      | 0:41 |
-   | \_    GUI [0/1]                    |        |        | 5:43 |      |
-   | \_      Tray Icon                  |        |        |      | 1:14 |
+   #+CAPTION: Clock summary at [2024-01-09 Di 00:11]
+   | Headline                           | Time    |         |      |      |
+   |------------------------------------+---------+---------+------+------|
+   | *Total time*                       | *11:57* |         |      |      |
+   |------------------------------------+---------+---------+------+------|
+   | *Wetterfrosch*                     | *11:57* |         |      |      |
+   | \_  /Components [0/4]/             |         | /11:57/ |      |      |
+   | \_    Load warnings from DWD [1/1] |         |         | 2:48 |      |
+   | \_      Testing                    |         |         |      | 0:41 |
+   | \_    GUI [1/2]                    |         |         | 9:09 |      |
+   | \_      Non-blocking refresh       |         |         |      | 3:26 |
+   | \_      Tray Icon                  |         |         |      | 1:14 |
    #+END:
 ** Features
 ** Components [0/4]
@@ -45,7 +46,7 @@
      CLOCK: [2024-01-02 Di 18:43]--[2024-01-02 Di 19:19] =>  0:36
      CLOCK: [2024-01-02 Di 18:23]--[2024-01-02 Di 18:28] =>  0:05
      :END:
-*** GUI [0/1]
+*** GUI [1/2]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -57,7 +58,18 @@
    CLOCK: [2024-01-03 Mi 17:21]--[2024-01-03 Mi 19:15] =>  1:54
    CLOCK: [2024-01-02 Di 19:41]--[2024-01-02 Di 19:51] =>  0:10
    :END:
-**** RESEARCH Tray Icon
+**** TODO Non-blocking refresh
+     :LOGBOOK:
+     CLOCK: [2024-01-08 Mo 20:45]--[2024-01-09 Di 00:11] =>  3:26
+     :END:
+     Querying the DWD servers currently blocks the GUI, I want to not block
+     the GUI. I can either use threads, or I could look into this async/await
+     thing Python has going on. I've had that on my radar for quite a while,
+     because Javascript has it, too, and it seems to be the hot shit these
+     days, but I have not really done anything with it. This might be a good
+     time to do so.
+**** DONE Tray Icon
+     CLOSED: [2024-01-08 Mo 20:19]
      :LOGBOOK:
      CLOCK: [2024-01-08 Mo 18:32]--[2024-01-08 Mo 19:43] =>  1:11
      CLOCK: [2024-01-06 Sa 20:27]--[2024-01-06 Sa 20:30] =>  0:03
@@ -75,6 +87,9 @@
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
    :END:
+   Displaying notifications is easy enough.
 **** TODO Make some noise
+     It would be nice if I could get some sound to be played. At least
+     optionally.
 ** Bugs
 
