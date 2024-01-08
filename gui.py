@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-08 19:22:09 krylon>
+# Time-stamp: <2024-01-08 19:44:36 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -32,6 +32,7 @@ gi.require_version("Gdk", "3.0")
 gi.require_version("GLib", "2.0")
 gi.require_version("Gio", "2.0")
 
+from gi.repository import Gdk as gdk  # noqa: E402
 from gi.repository import \
     Gtk as gtk  # noqa: E402 pylint: disable-msg=C0413,C0411
 from gi.repository import GLib \
@@ -148,6 +149,7 @@ class WetterGUI:
 
         self.win.connect("destroy", self.__quit)
         self.tray.connect("activate", self.__toggle_visible)
+        self.tray.connect("button-press-event", self.tray_menu)
         self.fm_quit_item.connect("activate", self.__quit)
         self.fm_refresh_item.connect("activate", self.load)
         if common.DEBUG:
@@ -168,6 +170,23 @@ class WetterGUI:
         self.tray.set_visible(False)
         self.win.destroy()
         gtk.main_quit()
+
+    def tray_menu(self, icon: gtk.StatusIcon, event: gdk.EventButton) -> None:
+        """Display the popup menu for the tray icon."""
+        if event.button != 3:
+            return
+
+        menu = gtk.Menu()
+        ref_item = gtk.MenuItem.new_with_mnemonic("_Aktualisieren")
+        quit_item = gtk.MenuItem.new_with_mnemonic("_Beenden")
+
+        ref_item.connect("activate", self.load)
+        quit_item.connect("activate", self.__quit)
+        menu.append(ref_item)
+        menu.append(quit_item)
+        # ...
+
+        menu.show_all()
 
     def display_msg(self, msg: str) -> None:
         """Display a message in a dialog."""
@@ -198,6 +217,7 @@ class WetterGUI:
         """Display weather warnings."""
         self.store.clear()
         now: Final[datetime] = datetime.now()
+        has_warnings: bool = False
         for event in data:
             d1: Final[datetime] = datetime.fromtimestamp(event["start"]/1000)
             d2: Final[datetime] = datetime.fromtimestamp(event["end"]/1000)
@@ -207,6 +227,7 @@ class WetterGUI:
                     event["headline"],
                     event["description"])
                 n.show()
+                has_warnings = True
 
             liter = self.store.append()
             self.store.set(
@@ -224,6 +245,11 @@ class WetterGUI:
                     event["instruction"],
                 ),
             )
+
+        if has_warnings:
+            self.tray.set_from_icon_name(ICON_NAME_WARN)
+        else:
+            self.tray.set_from_icon_name(ICON_NAME_DEFAULT)
 
     def load(self, *_ignore: Any) -> bool:
         """Fetch data, process, display"""
