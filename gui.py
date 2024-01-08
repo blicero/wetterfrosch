@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-06 20:20:10 krylon>
+# Time-stamp: <2024-01-08 19:22:09 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -30,11 +30,18 @@ from wetterfrosch import client, common
 gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
 gi.require_version("GLib", "2.0")
+gi.require_version("Gio", "2.0")
 
 from gi.repository import \
     Gtk as gtk  # noqa: E402 pylint: disable-msg=C0413,C0411
 from gi.repository import GLib \
     as glib  # noqa: E402 pylint: disable-msg=C0413,C0411
+from gi.repository import Gio \
+    as gio  # noqa: E402 pylint: disable-msg=C0413,C0411
+
+APP_ID: Final[str] = f"{common.APP_NAME}/{common.APP_VERSION}"
+ICON_NAME_DEFAULT: Final[str] = "weather-storm-symbolic"
+ICON_NAME_WARN: Final[str] = "weather-severe-alert-symbolic"
 
 
 # pylint: disable-msg=R0902,R0903
@@ -42,11 +49,11 @@ class WetterGUI:
     """Graphical frontend to the wetterfrosch app"""
 
     def __init__(self) -> None:
-        notify2.init(common.APP_NAME, "glib")
         self.log = common.get_logger("GUI")
         self.lock = Final[Lock]
         self.local = local()
         self.client: client.Client = client.Client(60, ["bielefeld"])
+        self.visible: bool = False
 
         ################################################################
         # Create window and widgets ####################################
@@ -76,8 +83,17 @@ class WetterGUI:
             str,  # Instructions
         )
 
+        # self.app = gtk.Application.new(APP_ID, gio.ApplicationFlags.DEFAULT_FLAGS)
         self.win = gtk.Window()
         self.win.set_title(f"{common.APP_NAME} {common.APP_VERSION}")
+        self.win.set_icon_name(ICON_NAME_DEFAULT)
+        self.tray = gtk.StatusIcon.new_from_icon_name(ICON_NAME_DEFAULT)
+        self.tray.set_has_tooltip(True)
+        self.tray.set_title(f"{common.APP_NAME} {common.APP_VERSION}")
+        self.tray.set_tooltip_text(f"{common.APP_NAME} {common.APP_VERSION}")
+
+        notify2.init(APP_ID, "glib")
+        # self.app.add_window(self.win)
 
         self.mbox: gtk.Box = gtk.Box(orientation=gtk.Orientation.VERTICAL)
         self.menubar: gtk.MenuBar = gtk.MenuBar()
@@ -131,15 +147,25 @@ class WetterGUI:
         ################################################################
 
         self.win.connect("destroy", self.__quit)
+        self.tray.connect("activate", self.__toggle_visible)
         self.fm_quit_item.connect("activate", self.__quit)
         self.fm_refresh_item.connect("activate", self.load)
         if common.DEBUG:
             self.fm_load_item.connect("activate", self.load_from_file)
 
         self.win.show_all()
+        self.visible = True
         glib.timeout_add(300_000, self.load)
 
+    def __toggle_visible(self, *_ignore: Any) -> None:
+        if self.visible:
+            self.win.hide()
+        else:
+            self.win.show_all()
+        self.visible = not self.visible
+
     def __quit(self, *_ignore: Any) -> None:
+        self.tray.set_visible(False)
         self.win.destroy()
         gtk.main_quit()
 
