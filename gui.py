@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-08 19:44:36 krylon>
+# Time-stamp: <2024-01-09 00:09:18 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -17,13 +17,15 @@ wetterfrosch.gui
 """
 
 import json
+import pprint
+import queue
+import time
 from datetime import datetime
-from threading import Lock, local
+from threading import Lock, Thread, local
 from typing import Any, Final
 
-import notify2
-
 import gi  # type: ignore
+import notify2
 
 from wetterfrosch import client, common
 
@@ -32,29 +34,38 @@ gi.require_version("Gdk", "3.0")
 gi.require_version("GLib", "2.0")
 gi.require_version("Gio", "2.0")
 
-from gi.repository import Gdk as gdk  # noqa: E402
+from gi.repository import \
+    Gdk as gdk  # noqa: E402 pylint: disable-msg=C0413,C0411
+from gi.repository import \
+    GLib as glib  # noqa: E402 pylint: disable-msg=C0413,C0411
 from gi.repository import \
     Gtk as gtk  # noqa: E402 pylint: disable-msg=C0413,C0411
-from gi.repository import GLib \
-    as glib  # noqa: E402 pylint: disable-msg=C0413,C0411
-from gi.repository import Gio \
-    as gio  # noqa: E402 pylint: disable-msg=C0413,C0411
+
+# from gi.repository import Gio \
+#     as gio  # noqa: E402 pylint: disable-msg=C0413,C0411
 
 APP_ID: Final[str] = f"{common.APP_NAME}/{common.APP_VERSION}"
 ICON_NAME_DEFAULT: Final[str] = "weather-storm-symbolic"
 ICON_NAME_WARN: Final[str] = "weather-severe-alert-symbolic"
+FETCH_INTERVAL: Final[int] = 300
 
 
 # pylint: disable-msg=R0902,R0903
 class WetterGUI:
     """Graphical frontend to the wetterfrosch app"""
 
+    # pylint: disable-msg=R0915
     def __init__(self) -> None:
         self.log = common.get_logger("GUI")
-        self.lock = Final[Lock]
+        self.lock: Final[Lock] = Lock()
         self.local = local()
-        self.client: client.Client = client.Client(60, ["bielefeld"])
+        self.queue: queue.SimpleQueue = queue.SimpleQueue()
+        # self.client: client.Client = client.Client(60, ["bielefeld"])
         self.visible: bool = False
+        self.active: bool = True
+
+        self.refresh_worker = Thread(target=self.__refresh_worker, daemon=True)
+        self.refresh_worker.start()
 
         ################################################################
         # Create window and widgets ####################################
@@ -84,7 +95,6 @@ class WetterGUI:
             str,  # Instructions
         )
 
-        # self.app = gtk.Application.new(APP_ID, gio.ApplicationFlags.DEFAULT_FLAGS)
         self.win = gtk.Window()
         self.win.set_title(f"{common.APP_NAME} {common.APP_VERSION}")
         self.win.set_icon_name(ICON_NAME_DEFAULT)
@@ -94,7 +104,6 @@ class WetterGUI:
         self.tray.set_tooltip_text(f"{common.APP_NAME} {common.APP_VERSION}")
 
         notify2.init(APP_ID, "glib")
-        # self.app.add_window(self.win)
 
         self.mbox: gtk.Box = gtk.Box(orientation=gtk.Orientation.VERTICAL)
         self.menubar: gtk.MenuBar = gtk.MenuBar()
@@ -157,7 +166,16 @@ class WetterGUI:
 
         self.win.show_all()
         self.visible = True
-        glib.timeout_add(300_000, self.load)
+        glib.timeout_add(2000, self.__check_queue)
+
+    def get_client(self) -> client.Client:
+        """Get the Client instance for the calling thread."""
+        try:
+            return self.local.client
+        except AttributeError:
+            c = client.Client(60, ["bielefeld"])
+            self.local.client = c
+            return c
 
     def __toggle_visible(self, *_ignore: Any) -> None:
         if self.visible:
@@ -167,11 +185,18 @@ class WetterGUI:
         self.visible = not self.visible
 
     def __quit(self, *_ignore: Any) -> None:
+        with self.lock:
+            self.active = False
         self.tray.set_visible(False)
         self.win.destroy()
         gtk.main_quit()
 
-    def tray_menu(self, icon: gtk.StatusIcon, event: gdk.EventButton) -> None:
+    def is_active(self) -> bool:
+        """Return the GUI's active flag."""
+        with self.lock:
+            return self.active
+
+    def tray_menu(self, _icon: gtk.StatusIcon, event: gdk.EventButton) -> None:
         """Display the popup menu for the tray icon."""
         if event.button != 3:
             return
@@ -218,14 +243,17 @@ class WetterGUI:
         self.store.clear()
         now: Final[datetime] = datetime.now()
         has_warnings: bool = False
+        self.log.debug("Displaying data:\n\t%s",
+                       pprint.pformat(data))
         for event in data:
-            d1: Final[datetime] = datetime.fromtimestamp(event["start"]/1000)
-            d2: Final[datetime] = datetime.fromtimestamp(event["end"]/1000)
+            d1: datetime = datetime.fromtimestamp(event["start"]/1000)
+            d2: datetime = datetime.fromtimestamp(event["end"]/1000)
 
             if d1 <= now <= d2:
                 n = notify2.Notification(
                     event["headline"],
-                    event["description"])
+                    event["description"],
+                    ICON_NAME_WARN)
                 n.show()
                 has_warnings = True
 
@@ -251,14 +279,44 @@ class WetterGUI:
         else:
             self.tray.set_from_icon_name(ICON_NAME_DEFAULT)
 
+    def __refresh_worker(self) -> None:
+        """Periodically fetch data from the DWD and process it."""
+        while self.is_active():
+            try:
+                dwd: client.Client = self.get_client()
+                raw = dwd.fetch()
+                if raw is None:
+                    self.display_msg("Client did not return any data.")
+                else:
+                    proc = dwd.process(raw)
+                    if proc is None or len(proc) == 0:
+                        self.display_msg(
+                            "No warnings were left after processing.")
+                    else:
+                        self.queue.put(proc)
+            except Exception as e:  # pylint: disable-msg=W0718
+                self.log.error(
+                    "Something went wrong refreshing our data: %s",
+                    e)
+            finally:
+                time.sleep(FETCH_INTERVAL)
+
+    def __check_queue(self) -> bool:
+        if not self.queue.empty():
+            if self.queue.qsize() > 0:
+                item = self.queue.get()
+                self.display_data(item)
+        return True
+
     def load(self, *_ignore: Any) -> bool:
         """Fetch data, process, display"""
+        c = self.get_client()
         try:
-            raw = self.client.fetch()
+            raw = c.fetch()
             if raw is None:
                 self.display_msg("Client did not return any data.")
                 return True
-            proc = self.client.process(raw)
+            proc = c.process(raw)
             if proc is None or len(proc) == 0:
                 self.display_msg("No warnings were left after processing.")
                 return True
@@ -292,7 +350,7 @@ class WetterGUI:
 
             with open(path, "r", encoding="utf-8") as fh:
                 data = json.load(fh)
-                warnings = self.client.process(data)
+                warnings = self.get_client().process(data)
                 assert warnings is not None
                 self.display_data(warnings)
         finally:
