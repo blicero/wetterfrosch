@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-09 00:09:18 krylon>
+# Time-stamp: <2024-01-09 20:04:06 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -26,6 +26,7 @@ from typing import Any, Final
 
 import gi  # type: ignore
 import notify2
+import requests  # type: ignore
 
 from wetterfrosch import client, common
 
@@ -50,6 +51,18 @@ ICON_NAME_WARN: Final[str] = "weather-severe-alert-symbolic"
 FETCH_INTERVAL: Final[int] = 300
 
 
+IPINFO_URL: Final[str] = "https://ipinfo.io/json"
+
+
+def get_location() -> str:
+    """Try to determine our location (city) using ipinfo.io"""
+    res = requests.get(IPINFO_URL, verify=True, timeout=5)
+    if res.status_code != 200:
+        return ""
+    data = res.json()
+    return data["city"]
+
+
 # pylint: disable-msg=R0902,R0903
 class WetterGUI:
     """Graphical frontend to the wetterfrosch app"""
@@ -60,9 +73,10 @@ class WetterGUI:
         self.lock: Final[Lock] = Lock()
         self.local = local()
         self.queue: queue.SimpleQueue = queue.SimpleQueue()
-        # self.client: client.Client = client.Client(60, ["bielefeld"])
         self.visible: bool = False
         self.active: bool = True
+
+        self.location = get_location()
 
         self.refresh_worker = Thread(target=self.__refresh_worker, daemon=True)
         self.refresh_worker.start()
@@ -173,7 +187,7 @@ class WetterGUI:
         try:
             return self.local.client
         except AttributeError:
-            c = client.Client(60, ["bielefeld"])
+            c = client.Client(60, [self.location])
             self.local.client = c
             return c
 
