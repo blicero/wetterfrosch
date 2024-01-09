@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-01-09 00:11:22 krylon>
+# Time-stamp: <2024-01-09 20:02:13 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -13,26 +13,30 @@
   German Weather Service (Deutscher Wetterdienst, [[https://www.dwd.de/][DWD]]) and display them.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2024-01-09 Di 00:11]
+   #+CAPTION: Clock summary at [2024-01-09 Di 19:59]
    | Headline                           | Time    |         |      |      |
    |------------------------------------+---------+---------+------+------|
-   | *Total time*                       | *11:57* |         |      |      |
+   | *Total time*                       | *13:30* |         |      |      |
    |------------------------------------+---------+---------+------+------|
-   | *Wetterfrosch*                     | *11:57* |         |      |      |
-   | \_  /Components [0/4]/             |         | /11:57/ |      |      |
-   | \_    Load warnings from DWD [1/1] |         |         | 2:48 |      |
+   | *Wetterfrosch*                     | *13:30* |         |      |      |
+   | \_  /Components [3/6]/             |         | /13:30/ |      |      |
+   | \_    Load warnings from DWD [2/2] |         |         | 4:21 |      |
+   | \_      Location                   |         |         |      | 1:33 |
    | \_      Testing                    |         |         |      | 0:41 |
-   | \_    GUI [1/2]                    |         |         | 9:09 |      |
+   | \_    GUI [2/2]                    |         |         | 9:09 |      |
    | \_      Non-blocking refresh       |         |         |      | 3:26 |
    | \_      Tray Icon                  |         |         |      | 1:14 |
    #+END:
 ** Features
-** Components [0/4]
+** Components [3/6]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
   :VISIBILITY: children
   :END:
-*** TODO Load warnings from DWD [1/1]
+*** MEDITATE Database?
+    Do I want a database of some kind? I am not sure what the value would be,
+    the main point of the application is to display current warnings.
+*** TODO Load warnings from DWD [2/2]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
     :VISIBILITY: children
@@ -40,13 +44,42 @@
     :LOGBOOK:
     CLOCK: [2023-12-30 Sa 16:27]--[2023-12-30 Sa 18:34] =>  2:07
     :END:
+**** DONE Location
+     CLOSED: [2024-01-09 Di 19:59]
+     :LOGBOOK:
+     CLOCK: [2024-01-09 Di 18:26]--[2024-01-09 Di 19:59] =>  1:33
+     :END:
+     I currently use a hardwire list of regular expressions to filter which
+     warnings are relevant to me (okay, it's *one* regular expression). I
+     would like to make that configurable at runtime.
+     Ideally, it would be nice if I could detect the current location
+     automatically. ...
+     That appears to be possible, but the API is a bit ... unfamiliar, I
+     suppose. Let's see how that works.
+     ... No, at my first test, I am getting rather nonsensical results, and
+     it's only coordinates anyway, I would still need to convert that to a
+     location name. :-|
+     I'll try a library named geopy. Either I can feed it the coordinates I
+     get from geoclue, or maybe I can even do the entire process via geopy.
+     ...
+     Okay, getting the location name from geopy works nicely, but the
+     coordinates geoclue gives me are bogus - it thinks I'm in Israel. Not
+     helpful.
+     [2024-01-09 Di 19:56]
+     In the end, the solution was almost painfully simple. ipinfo.io offers a
+     web service that tells you not only your public IP address (I thinking of
+     using geoIP to convert that to a location), but kindly includes the
+     location name. I like this solution because it doesn't require anything
+     outside of Python's standard library.
+     ... Oh wait, requests is not from the standard library.
+     But still. It's a very simple solution, which I like.
 **** DONE Testing
      CLOSED: [2024-01-02 Di 19:19]
      :LOGBOOK:
      CLOCK: [2024-01-02 Di 18:43]--[2024-01-02 Di 19:19] =>  0:36
      CLOCK: [2024-01-02 Di 18:23]--[2024-01-02 Di 18:28] =>  0:05
      :END:
-*** GUI [1/2]
+*** GUI [2/2]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -58,7 +91,8 @@
    CLOCK: [2024-01-03 Mi 17:21]--[2024-01-03 Mi 19:15] =>  1:54
    CLOCK: [2024-01-02 Di 19:41]--[2024-01-02 Di 19:51] =>  0:10
    :END:
-**** TODO Non-blocking refresh
+**** SUSPENDED Non-blocking refresh
+     CLOSED: [2024-01-09 Di 18:11]
      :LOGBOOK:
      CLOCK: [2024-01-08 Mo 20:45]--[2024-01-09 Di 00:11] =>  3:26
      :END:
