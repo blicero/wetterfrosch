@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-10 12:26:06 krylon>
+# Time-stamp: <2024-01-10 18:50:59 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -212,11 +212,11 @@ class WetterGUI:
 
         ref_item.connect("activate", self.load)
         quit_item.connect("activate", self.__quit)
+
         menu.append(ref_item)
         menu.append(quit_item)
-        # ...
-
         menu.show_all()
+        menu.popup_at_pointer(event)
 
     def get_location(self) -> str:
         """Try to determine our location (city) using ipinfo.io"""
