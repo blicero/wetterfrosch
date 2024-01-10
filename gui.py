@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-09 20:04:06 krylon>
+# Time-stamp: <2024-01-10 12:26:06 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -54,15 +54,6 @@ FETCH_INTERVAL: Final[int] = 300
 IPINFO_URL: Final[str] = "https://ipinfo.io/json"
 
 
-def get_location() -> str:
-    """Try to determine our location (city) using ipinfo.io"""
-    res = requests.get(IPINFO_URL, verify=True, timeout=5)
-    if res.status_code != 200:
-        return ""
-    data = res.json()
-    return data["city"]
-
-
 # pylint: disable-msg=R0902,R0903
 class WetterGUI:
     """Graphical frontend to the wetterfrosch app"""
@@ -76,7 +67,7 @@ class WetterGUI:
         self.visible: bool = False
         self.active: bool = True
 
-        self.location = get_location()
+        self.location = self.get_location()
 
         self.refresh_worker = Thread(target=self.__refresh_worker, daemon=True)
         self.refresh_worker.start()
@@ -226,6 +217,18 @@ class WetterGUI:
         # ...
 
         menu.show_all()
+
+    def get_location(self) -> str:
+        """Try to determine our location (city) using ipinfo.io"""
+        try:
+            res = requests.get(IPINFO_URL, verify=True, timeout=5)
+            if res.status_code != 200:
+                return ""
+            data = res.json()
+            return data["city"]
+        except Exception as e:  # pylint: disable-msg=W0718
+            self.log.error("Failed to get location: %s", e)
+            return ""
 
     def display_msg(self, msg: str) -> None:
         """Display a message in a dialog."""
