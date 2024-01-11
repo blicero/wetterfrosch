@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-02 19:32:39 krylon>
+# Time-stamp: <2024-01-11 17:42:55 krylon>
 #
 # /data/code/python/wetterfrosch/dwd.py
 # created on 28. 12. 2023
@@ -22,7 +22,9 @@ import logging
 import re
 import urllib.request
 from datetime import datetime, timedelta
-from typing import Final, Optional
+from threading import Lock
+from typing import Any, Final, Optional, Union
+from warnings import warn
 
 from wetterfrosch import common
 
@@ -31,6 +33,78 @@ WARNINGS_URL: Final[str] = \
 
 ENVELOPE_PAT: Final[re.Pattern] = \
     re.compile(r"^warnWetter[.]loadWarnings\((.*)\);", re.DOTALL)
+
+
+class LocationList:
+    """A (singleton) list of regular expressions describing locations."""
+
+    __slots__ = ["patterns", "lock"]
+
+    clock = Lock()
+    _instance = None
+    patterns: list[re.Pattern]
+    lock: Lock
+
+    def __init__(self):
+        raise RuntimeError("Call LocationList.new() instead.")
+
+    @classmethod
+    def new(cls, *patterns: Union[str, re.Pattern]) -> Any:
+        """Return the singleton instance.
+        If it has not been created yet, create it and return it."""
+        with cls.clock:
+            if cls._instance is None:
+                print("Creating singleton instance.")
+                try:
+                    cls._instance = cls.__new__(cls)
+                    cls._instance.patterns = []
+                    cls._instance.lock = Lock()
+                    for i in patterns:
+                        if isinstance(i, str):
+                            cls._instance.patterns.append(re.compile(i, re.I))
+                        elif isinstance(i, re.Pattern):
+                            cls._instance.patterns.append(i)
+                        else:
+                            raise TypeError(
+                                "Patterns must be str or re.Pattern")
+                except Exception as e:
+                    print("Error creating LocationList singleton instance:", e)
+                    raise
+            if len(patterns) > 0:
+                warn(
+                    "Singleton instance already exists, ignoring new patterns")
+            return cls._instance
+
+    def cnt(self) -> int:
+        """Return the number of patterns in the list"""
+        with self.lock:
+            return len(self.patterns)
+
+    def clear(self) -> None:
+        """Empty the current list of patterns"""
+        with self.lock:
+            self.patterns = []
+
+    def add(self, item: Union[str, re.Pattern]) -> None:
+        """Add a new pattern. If <item> is a string, it is compiled to
+        a re.Pattern"""
+        with self.lock:
+            if isinstance(item, str):
+                pat = re.compile(item, re.I)
+                self.patterns.append(pat)
+            else:
+                self.patterns.append(item)
+
+    def check(self, loc: str) -> bool:
+        """Check if the given string is matched by any of the List's
+        regular expressions."""
+        with self.lock:
+            if len(self.patterns) == 0:
+                return True
+            for p in self.patterns:
+                if p.search(loc) is not None:
+                    return True
+            return False
 
 
 class Client:
@@ -45,18 +119,19 @@ class Client:
 
     log: logging.Logger
     last_fetch: datetime
-    loc_patterns: list[re.Pattern]
+    loc_patterns: LocationList
     interval: timedelta
+
+    _loc: list[str] = []
 
     def __init__(self, interval: int = 30, patterns: Optional[list[str]] = None) -> None:  # noqa: E501 pylint: disable-msg=C0301
         self.log = common.get_logger("client")
         self.interval = timedelta(seconds=interval)
-        self.loc_patterns = []
-        self.last_fetch = datetime.fromtimestamp(0)
         if patterns is not None:
-            for p in patterns:
-                r = re.compile(p, re.I)
-                self.loc_patterns.append(r)
+            self.loc_patterns = LocationList.new(*patterns)
+        else:
+            self.loc_patterns = LocationList.new()
+        self.last_fetch = datetime.fromtimestamp(0)
 
     def fetch(self) -> Optional[dict]:
         """Fetch the current list of warnings from DWD."""
@@ -83,13 +158,9 @@ class Client:
         warnings: list[dict] = []
         for w in data["warnings"].values():
             for event in w:
-                if len(self.loc_patterns) == 0:
+                if self.loc_patterns.check(event["regionName"]):
                     warnings.append(event)
-                else:
-                    for p in self.loc_patterns:
-                        if p.search(event["regionName"]) is not None:
-                            warnings.append(event)
-                            break
+                    break
         return warnings
 
 
