@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-10 18:50:59 krylon>
+# Time-stamp: <2024-01-11 17:49:14 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -25,6 +25,7 @@ from threading import Lock, Thread, local
 from typing import Any, Final
 
 import gi  # type: ignore
+import krylib
 import notify2
 import requests  # type: ignore
 
@@ -67,7 +68,17 @@ class WetterGUI:
         self.visible: bool = False
         self.active: bool = True
 
-        self.location = self.get_location()
+        self.location: list[str] = []
+        loc: str = self.get_location()
+        if loc != "":
+            self.location.append(loc)
+
+        loc_path: Final[str] = common.path.locations()
+
+        if krylib.fexist(loc_path):
+            with open(loc_path, "r", encoding="utf-8") as fh:
+                for line in fh:
+                    self.location.append(line.strip())
 
         self.refresh_worker = Thread(target=self.__refresh_worker, daemon=True)
         self.refresh_worker.start()
@@ -89,15 +100,15 @@ class WetterGUI:
         ]
 
         self.store = gtk.ListStore(
-            int,  # Record ID
-            int,  # Level
-            str,  # Region
-            str,  # Start
-            str,  # End
-            str,  # Event
-            str,  # Headline
-            str,  # Description
-            str,  # Instructions
+            int,  # 0, Record ID
+            int,  # 1, Level
+            str,  # 2, Region
+            str,  # 3, Start
+            str,  # 4, End
+            str,  # 5, Event
+            str,  # 6, Headline
+            str,  # 7, Description
+            str,  # 8, Instructions
         )
 
         self.win = gtk.Window()
@@ -178,7 +189,7 @@ class WetterGUI:
         try:
             return self.local.client
         except AttributeError:
-            c = client.Client(60, [self.location])
+            c = client.Client(60, self.location)
             self.local.client = c
             return c
 
