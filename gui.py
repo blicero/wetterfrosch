@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-11 17:49:14 krylon>
+# Time-stamp: <2024-01-11 17:58:36 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -288,9 +288,8 @@ class WetterGUI:
             liter = self.store.append()
             self.store.set(
                 liter,
-                (0, 1, 2, 3, 4, 5, 6, 7, 8),
+                (1, 2, 3, 4, 5, 6, 7, 8),
                 (
-                    0,
                     event["level"],
                     event["regionName"],
                     d1.strftime(common.TIME_FMT),
