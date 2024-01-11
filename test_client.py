@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-05 18:31:55 krylon>
+# Time-stamp: <2024-01-11 17:14:42 krylon>
 #
 # /data/code/python/wetterfrosch/test_client.py
 # created on 02. 01. 2024
@@ -68,7 +68,6 @@ class ClientTest(unittest.TestCase):
     def test_02_fetch_data(self) -> None:
         """Try to fetch data."""
         c: Optional[Client] = self.__class__.client()
-        assert c is not None
         self.assertIsNotNone(c)
         try:
             assert c is not None
