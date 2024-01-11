@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-02 19:32:19 krylon>
+# Time-stamp: <2024-01-10 19:18:48 krylon>
 #
 # /data/code/python/wetterfrosch/common.py
 # created on 29. 12. 2023
@@ -54,6 +54,10 @@ class Path:
     def log(self) -> str:
         """Return the path to the log file"""
         return os.path.join(self.__base, f"{APP_NAME.lower()}.log")
+
+    def locations(self) -> str:
+        """Return the of the location(s) file"""
+        return os.path.join(self.__base, "locations.txt")
 
 
 path: Path = Path(os.path.expanduser(f"~/.{APP_NAME.lower()}.d"))
