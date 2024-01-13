@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-13 14:40:47 krylon>
+# Time-stamp: <2024-01-13 18:37:25 krylon>
 #
 # /data/code/python/wetterfrosch/data.py
 # created on 12. 01. 2024
@@ -27,6 +27,7 @@ class WeatherWarning:
     weather conditions."""
 
     __slots__ = [
+        "wid",
         "state",
         "wtype",
         "level",
@@ -42,6 +43,7 @@ class WeatherWarning:
         "altitude_end",
     ]
 
+    wid: int
     state: str
     wtype: int
     level: int
@@ -56,7 +58,8 @@ class WeatherWarning:
     altitude_start: Optional[int]
     altitude_end: Optional[int]
 
-    def __init__(self, record: dict) -> None:
+    def __init__(self, record: dict, wid: int = 0) -> None:
+        self.wid = wid
         self.state = record["state"]
         self.wtype = record["type"]
         self.level = record["level"]
