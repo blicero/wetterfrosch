@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # pylint: disable-msg=C0302
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-13 21:04:00 krylon>
+# Time-stamp: <2024-01-14 18:42:58 krylon>
 #
 # /data/code/python/wetterfrosch/test_database.py
 # created on 13. 01. 2024
@@ -17,6 +17,7 @@ wetterfrosch.test_database
 (c) 2024 Benjamin Walkenhorst
 """
 
+import json
 import os
 import unittest
 from datetime import datetime
@@ -25,6 +26,7 @@ from typing import Final
 from krylib import isdir
 
 from wetterfrosch import common, database
+from wetterfrosch.data import WeatherWarning
 
 TEST_ROOT: str = "/tmp/"
 
@@ -50,7 +52,7 @@ class DatabaseTest(unittest.TestCase):
     def tearDownClass(cls) -> None:
         os.system(f"/bin/rm -rf {cls.folder}")
 
-    def get_db(self) -> database.Database:
+    def __get_db(self) -> database.Database:
         """Get the shared database instance."""
         return self.__class__.db
 
@@ -60,12 +62,30 @@ class DatabaseTest(unittest.TestCase):
             self.__class__.db = database.Database(common.path.db())
         except Exception as e:  # pylint: disable-msg=W0718
             self.fail(f"Failed to open database: {e}")
+        finally:
+            self.assertIsNotNone(self.__class__.db)
 
     # This could easily become very tedious unless I figure out a way to semi-
     # randomly generate dummy warnings.
     # And how much effort am I willing to put into it?
     def test_02_db_add(self) -> None:
         """Test adding warnings to the database."""
+        db = self.__get_db()
+        raw = json.loads(TEST_DATA)
+        cnt: int = 0
+        try:
+            with db:
+                for group in raw.values():
+                    for item in group:
+                        w = WeatherWarning(item)
+                        db.warning_add(w)
+                        cnt += 1
+
+            with db:
+                items = db.warning_get_all()
+                self.assertEqual(len(items), cnt)
+        except Exception as e:  # pylint: disable-msg=W0718
+            self.fail(f"Failed to add items to the database: {e}")
 
 
 # Test data

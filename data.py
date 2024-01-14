@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-13 18:37:25 krylon>
+# Time-stamp: <2024-01-14 18:37:55 krylon>
 #
 # /data/code/python/wetterfrosch/data.py
 # created on 12. 01. 2024
@@ -64,7 +64,10 @@ class WeatherWarning:
         self.wtype = record["type"]
         self.level = record["level"]
         self.start = datetime.fromtimestamp(record["start"]/1000)
-        self.end = datetime.fromtimestamp(record["end"]/1000)
+        if ("end" in record) and record["end"] is not None:
+            self.end = datetime.fromtimestamp(record["end"]/1000 + 14400)
+        else:
+            self.end = self.start
         self.region_name = record["regionName"]
         self.description = record["description"]
         self.event = record["event"]

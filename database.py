@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-13 19:57:50 krylon>
+# Time-stamp: <2024-01-14 00:46:34 krylon>
 #
 # /data/code/python/wetterfrosch/database.py
 # created on 13. 01. 2024
@@ -46,8 +46,8 @@ INIT_QUERIES: Final[list[str]] = [
         headline        TEXT NOT NULL,
         instruction     TEXT NOT NULL,
         state_short     TEXT NOT NULL,
-        altitude_start  INTEGER NOT NULL,
-        altitude_end    INTEGER NOT NULL,
+        altitude_start  INTEGER,
+        altitude_end    INTEGER,
         CHECK           (start <= end),
         CHECK           (altitude_start <= altitude_end)
     ) STRICT
