@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-01-11 17:47:14 krylon>
+# Time-stamp: <2024-01-14 18:44:32 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -13,20 +13,21 @@
   German Weather Service (Deutscher Wetterdienst, [[https://www.dwd.de/][DWD]]) and display them.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2024-01-11 Do 17:47]
-   | Headline                           | Time    |         |       |      |
-   |------------------------------------+---------+---------+-------+------|
-   | *Total time*                       | *20:27* |         |       |      |
-   |------------------------------------+---------+---------+-------+------|
-   | *Wetterfrosch*                     | *20:27* |         |       |      |
-   | \_  /Components [5/8]/             |         | /20:27/ |       |      |
-   | \_    Load warnings from DWD [2/3] |         |         |  4:21 |      |
-   | \_      Location                   |         |         |       | 1:33 |
-   | \_      Testing                    |         |         |       | 0:41 |
-   | \_    GUI [2/3]                    |         |         | 16:06 |      |
-   | \_      Location management        |         |         |       | 6:57 |
-   | \_      Non-blocking refresh       |         |         |       | 3:26 |
-   | \_      Tray Icon                  |         |         |       | 1:14 |
+   #+CAPTION: Clock summary at [2024-01-14 So 18:44]
+   | Headline                           | Time      |           |       |      |
+   |------------------------------------+-----------+-----------+-------+------|
+   | *Total time*                       | *1d 0:36* |           |       |      |
+   |------------------------------------+-----------+-----------+-------+------|
+   | *Wetterfrosch*                     | *1d 0:36* |           |       |      |
+   | \_  /Components [5/8]/             |           | /1d 0:36/ |       |      |
+   | \_    Database                     |           |           |  4:09 |      |
+   | \_    Load warnings from DWD [2/3] |           |           |  4:21 |      |
+   | \_      Location                   |           |           |       | 1:33 |
+   | \_      Testing                    |           |           |       | 0:41 |
+   | \_    GUI [2/3]                    |           |           | 16:06 |      |
+   | \_      Location management        |           |           |       | 6:57 |
+   | \_      Non-blocking refresh       |           |           |       | 3:26 |
+   | \_      Tray Icon                  |           |           |       | 1:14 |
    #+END:
 ** Features
 ** Components [5/8]
@@ -34,9 +35,15 @@
   :COOKIE_DATA: todo recursive
   :VISIBILITY: children
   :END:
-*** MEDITATE Database?
+*** MEDITATE Database
+    :LOGBOOK:
+    CLOCK: [2024-01-13 Sa 17:50]--[2024-01-13 Sa 21:59] =>  4:09
+    :END:
     Do I want a database of some kind? I am not sure what the value would be,
     the main point of the application is to display current warnings.
+    ...
+    Turns out, to everyone's complete surprise - yes, I do. Same procedure as
+    every year.
 *** DONE Load warnings from DWD [2/3]
     CLOSED: [2024-01-10 Mi 18:53]
     :PROPERTIES:
