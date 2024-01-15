@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # pylint: disable-msg=C0302
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-14 18:42:58 krylon>
+# Time-stamp: <2024-01-15 20:34:46 krylon>
 #
 # /data/code/python/wetterfrosch/test_database.py
 # created on 13. 01. 2024
@@ -43,7 +43,8 @@ class DatabaseTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         stamp = datetime.now()
-        folder_name = stamp.strftime("vox_test_database_%Y%m%d_%H%M%S")
+        folder_name = \
+            stamp.strftime("wetterfrosch_test_database_%Y%m%d_%H%M%S")
         cls.folder = os.path.join(TEST_ROOT,
                                   folder_name)
         common.set_basedir(cls.folder)
@@ -86,6 +87,16 @@ class DatabaseTest(unittest.TestCase):
                 self.assertEqual(len(items), cnt)
         except Exception as e:  # pylint: disable-msg=W0718
             self.fail(f"Failed to add items to the database: {e}")
+
+    def test_03_db_get_keys(self) -> None:
+        """Test gettings the keys from the database records."""
+        db = self.__get_db()
+        keys = db.warning_get_keys()
+        self.assertIsNotNone(keys)
+        self.assertIsInstance(keys, set)
+        self.assertGreater(len(keys), 0)
+        for k in keys:
+            self.assertTrue(db.warning_has_key(k))
 
 
 # Test data

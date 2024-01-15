@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-14 00:46:34 krylon>
+# Time-stamp: <2024-01-15 20:31:28 krylon>
 #
 # /data/code/python/wetterfrosch/database.py
 # created on 13. 01. 2024
@@ -48,6 +48,19 @@ INIT_QUERIES: Final[list[str]] = [
         state_short     TEXT NOT NULL,
         altitude_start  INTEGER,
         altitude_end    INTEGER,
+        key             TEXT GENERATED ALWAYS AS (
+                                start ||
+                                '--' ||
+                                end ||
+                                '--' ||
+                                region_name ||
+                                '--' ||
+                                event ||
+                                '--' ||
+                                headline ||
+                                '--' ||
+                                level
+                        ) VIRTUAL,
         CHECK           (start <= end),
         CHECK           (altitude_start <= altitude_end)
     ) STRICT
@@ -65,6 +78,8 @@ class Query(Enum):
     WarningAdd = auto()
     WarningGetByPeriod = auto()
     WarningGetAll = auto()
+    WarningGetKeys = auto()
+    WarningHasKey = auto()
 
 
 db_queries: Final[dict[Query, str]] = {
@@ -124,6 +139,18 @@ SELECT
 FROM warning
 WHERE start <= ? AND ? <= end -- XXX Needs thorough testing!
 ORDER BY start, region_name
+    """,
+    Query.WarningGetKeys: """
+ SELECT
+    key
+FROM warning
+ORDER BY region_name, event, start, end
+    """,
+    Query.WarningHasKey: """
+SELECT
+    COUNT(id) AS cnt
+ FROM warning
+ WHERE key = ?
     """,
 }
 
@@ -246,6 +273,22 @@ class Database:
             record = WeatherWarning(raw, row[0])
             results.append(record)
         return results
+
+    def warning_get_keys(self) -> set[str]:
+        """Return the keys of all warnings stored in the database."""
+        cur: Final[sqlite3.Cursor] = self.db.cursor()
+        cur.execute(db_queries[Query.WarningGetKeys])
+        results: set[str] = set()
+        for row in cur:
+            results.add(row[0])
+        return results
+
+    def warning_has_key(self, key: str) -> bool:
+        """Check if the given key is present in the database."""
+        cur: Final[sqlite3.Cursor] = self.db.cursor()
+        cur.execute(db_queries[Query.WarningHasKey], (key, ))
+        row = cur.fetchone()
+        return row[0] > 0
 
 # Local Variables: #
 # python-indent: 4 #
