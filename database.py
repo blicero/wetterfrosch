@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-15 20:31:28 krylon>
+# Time-stamp: <2024-01-16 17:00:43 krylon>
 #
 # /data/code/python/wetterfrosch/database.py
 # created on 13. 01. 2024
@@ -169,7 +169,9 @@ class Database:
     log: logging.Logger
     path: Final[str]
 
-    def __init__(self, path: str) -> None:
+    def __init__(self, path: str = "") -> None:
+        if path == "":
+            path = common.path.db()
         self.path = path
         self.log = common.get_logger("database")
         self.log.debug("Open database at %s", path)
