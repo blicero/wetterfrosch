@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-11 17:58:36 krylon>
+# Time-stamp: <2024-01-16 21:51:40 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -29,7 +29,8 @@ import krylib
 import notify2
 import requests  # type: ignore
 
-from wetterfrosch import client, common
+from wetterfrosch import client, common, database
+from wetterfrosch.data import WeatherWarning
 
 gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
@@ -193,6 +194,15 @@ class WetterGUI:
             self.local.client = c
             return c
 
+    def get_database(self) -> database.Database:
+        """Get the Database instance for the calling thread."""
+        try:
+            return self.local.db
+        except AttributeError:
+            db = database.Database()
+            self.local.db = db
+            return db
+
     def __toggle_visible(self, *_ignore: Any) -> None:
         if self.visible:
             self.win.hide()
@@ -266,7 +276,7 @@ class WetterGUI:
         finally:
             dlg.destroy()
 
-    def display_data(self, data: list[dict]) -> None:
+    def display_data(self, data: list[WeatherWarning]) -> None:
         """Display weather warnings."""
         self.store.clear()
         now: Final[datetime] = datetime.now()
@@ -274,13 +284,13 @@ class WetterGUI:
         self.log.debug("Displaying data:\n\t%s",
                        pprint.pformat(data))
         for event in data:
-            d1: datetime = datetime.fromtimestamp(event["start"]/1000)
-            d2: datetime = datetime.fromtimestamp(event["end"]/1000)
+            d1: datetime = event.start
+            d2: datetime = event.end
 
             if d1 <= now <= d2:
                 n = notify2.Notification(
-                    event["headline"],
-                    event["description"],
+                    event.headline,
+                    event.description,
                     ICON_NAME_WARN)
                 n.show()
                 has_warnings = True
@@ -290,14 +300,14 @@ class WetterGUI:
                 liter,
                 (1, 2, 3, 4, 5, 6, 7, 8),
                 (
-                    event["level"],
-                    event["regionName"],
+                    event.level,
+                    event.region_name,
                     d1.strftime(common.TIME_FMT),
                     d2.strftime(common.TIME_FMT),
-                    event["event"],
-                    event["headline"],
-                    event["description"],
-                    event["instruction"],
+                    event.event,
+                    event.headline,
+                    event.description,
+                    event.instruction,
                 ),
             )
 

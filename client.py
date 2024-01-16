@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-11 17:42:55 krylon>
+# Time-stamp: <2024-01-16 21:52:02 krylon>
 #
 # /data/code/python/wetterfrosch/dwd.py
 # created on 28. 12. 2023
@@ -26,7 +26,7 @@ from threading import Lock
 from typing import Any, Final, Optional, Union
 from warnings import warn
 
-from wetterfrosch import common
+from wetterfrosch import common, data
 
 WARNINGS_URL: Final[str] = \
     "https://www.dwd.de/DWD/warnungen/warnapp/json/warnings.json"
@@ -150,16 +150,17 @@ class Client:
             m: Final[Optional[re.Match[str]]] = ENVELOPE_PAT.match(body)
             assert m is not None  # SRSLY?
             payload: Final[str] = m[1]
-            data: dict = json.loads(payload)
-            return data
+            records: dict = json.loads(payload)
+            return records
 
-    def process(self, data: dict) -> Optional[list[dict]]:
+    def process(self, items: dict) -> Optional[list[data.WeatherWarning]]:
         """Process the data we received from the DWD web site."""
-        warnings: list[dict] = []
-        for w in data["warnings"].values():
+        warnings: list[data.WeatherWarning] = []
+        for w in items["warnings"].values():
             for event in w:
                 if self.loc_patterns.check(event["regionName"]):
-                    warnings.append(event)
+                    warning = data.WeatherWarning(event)
+                    warnings.append(warning)
                     break
         return warnings
 
