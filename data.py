@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-14 18:37:55 krylon>
+# Time-stamp: <2024-01-17 10:28:24 krylon>
 #
 # /data/code/python/wetterfrosch/data.py
 # created on 12. 01. 2024
@@ -16,7 +16,7 @@ wetterfrosch.data
 (c) 2024 Benjamin Walkenhorst
 """
 
-import hashlib
+# import hashlib
 from datetime import datetime
 from typing import Final, Optional
 
@@ -83,8 +83,9 @@ class WeatherWarning:
             f"{self.start}--{self.end}--{self.region_name}--{self.event}--" + \
             f"{self.headline}--{self.level}"
 
-        cksum: Final[str] = hashlib.sha512(summary.encode()).hexdigest()
-        return cksum
+        # cksum: Final[str] = hashlib.sha512(summary.encode()).hexdigest()
+        # return cksum
+        return summary
 
 # local Variables: #
 # python-indent: 4 #
