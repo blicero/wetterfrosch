@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-16 21:51:40 krylon>
+# Time-stamp: <2024-01-17 11:36:08 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -65,6 +65,7 @@ class WetterGUI:
         self.log = common.get_logger("GUI")
         self.lock: Final[Lock] = Lock()
         self.local = local()
+        self.alert_cache: set[str] = set()
         self.queue: queue.SimpleQueue = queue.SimpleQueue()
         self.visible: bool = False
         self.active: bool = True
@@ -287,16 +288,18 @@ class WetterGUI:
         self.log.debug("Displaying data:\n\t%s",
                        pprint.pformat(data))
         for event in data:
-            d1: datetime = event.start
-            d2: datetime = event.end
+            d1: datetime = event.start  # pylint: disable-msg=C0103
+            d2: datetime = event.end  # pylint: disable-msg=C0103
 
-            if d1 <= now <= d2:
-                n = notify2.Notification(
+            if d1 <= now <= d2 and not self.__known_alert(event):
+                n = notify2.Notification(  # pylint: disable-msg=C0103
                     event.headline,
                     event.description,
                     ICON_NAME_WARN)
                 n.show()
                 has_warnings = True
+                with self.lock:
+                    self.alert_cache.add(event.cksum())
 
             liter = self.store.append()
             self.store.set(
@@ -347,6 +350,10 @@ class WetterGUI:
                 item = self.queue.get()
                 self.display_data(item)
         return True
+
+    def __known_alert(self, alert: WeatherWarning) -> bool:
+        with self.lock:
+            return alert.cksum() in self.alert_cache
 
     def load(self, *_ignore: Any) -> bool:
         """Fetch data, process, display"""
