@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-01-15 20:36:30 krylon>
+# Time-stamp: <2024-01-17 16:22:32 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -13,14 +13,14 @@
   German Weather Service (Deutscher Wetterdienst, [[https://www.dwd.de/][DWD]]) and display them.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2024-01-15 Mo 20:36]
+   #+CAPTION: Clock summary at [2024-01-17 Mi 16:22]
    | Headline                           | Time      |           |       |      |
    |------------------------------------+-----------+-----------+-------+------|
-   | *Total time*                       | *1d 4:32* |           |       |      |
+   | *Total time*                       | *1d 6:04* |           |       |      |
    |------------------------------------+-----------+-----------+-------+------|
-   | *Wetterfrosch*                     | *1d 4:32* |           |       |      |
-   | \_  /Components [5/9]/             |           | /1d 4:32/ |       |      |
-   | \_    Database                     |           |           |  8:05 |      |
+   | *Wetterfrosch*                     | *1d 6:04* |           |       |      |
+   | \_  /Components [5/9]/             |           | /1d 6:04/ |       |      |
+   | \_    Database                     |           |           |  9:37 |      |
    | \_    Load warnings from DWD [2/3] |           |           |  4:21 |      |
    | \_      Location                   |           |           |       | 1:33 |
    | \_      Testing                    |           |           |       | 0:41 |
@@ -37,6 +37,7 @@
   :END:
 *** IMPLEMENT Database
     :LOGBOOK:
+    CLOCK: [2024-01-17 Mi 10:12]--[2024-01-17 Mi 11:44] =>  1:32
     CLOCK: [2024-01-15 Mo 17:42]--[2024-01-15 Mo 20:36] =>  2:54
     CLOCK: [2024-01-15 Mo 15:53]--[2024-01-15 Mo 16:55] =>  1:02
     CLOCK: [2024-01-13 Sa 17:50]--[2024-01-13 Sa 21:59] =>  4:09
