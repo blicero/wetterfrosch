@@ -26,7 +26,7 @@ from typing import Any, Final
 
 import gi  # type: ignore
 import krylib
-import notify2
+import notify2  # type: ignore
 import requests  # type: ignore
 
 from wetterfrosch import client, common, database
@@ -38,11 +38,11 @@ gi.require_version("GLib", "2.0")
 gi.require_version("Gio", "2.0")
 
 from gi.repository import \
-    Gdk as gdk  # noqa: E402 pylint: disable-msg=C0413,C0411
+    Gdk as gdk  # noqa: E402 pylint: disable-msg=C0413,C0411 # type: ignore
 from gi.repository import \
-    GLib as glib  # noqa: E402 pylint: disable-msg=C0413,C0411
+    GLib as glib  # noqa: E402 pylint: disable-msg=C0413,C0411 # type: ignore
 from gi.repository import \
-    Gtk as gtk  # noqa: E402 pylint: disable-msg=C0413,C0411
+    Gtk as gtk  # noqa: E402 pylint: disable-msg=C0413,C0411 # type: ignore
 
 # from gi.repository import Gio \
 #     as gio  # noqa: E402 pylint: disable-msg=C0413,C0411
@@ -77,7 +77,10 @@ class WetterGUI:
         loc_path: Final[str] = common.path.locations()
 
         if krylib.fexist(loc_path):
-            with open(loc_path, "r", encoding="utf-8") as fh:
+            with open(loc_path,
+                      "r",
+                      encoding="utf-8") \
+                    as fh:  # pylint: disable-msg=C0103
                 for line in fh:
                     self.location.append(line.strip())
 
@@ -136,7 +139,7 @@ class WetterGUI:
 
         self.warn_view = gtk.TreeView(model=self.store)
 
-        for c in columns:
+        for c in columns:  # pylint: disable-msg=C0103
             col: gtk.TreeViewColumn = gtk.TreeViewColumn(
                 c[1],
                 gtk.CellRendererText(),
@@ -190,7 +193,7 @@ class WetterGUI:
         try:
             return self.local.client
         except AttributeError:
-            c = client.Client(60, self.location)
+            c = client.Client(60, self.location)  # # pylint: disable-msg=C0103
             self.local.client = c
             return c
 
@@ -199,7 +202,7 @@ class WetterGUI:
         try:
             return self.local.db
         except AttributeError:
-            db = database.Database()
+            db = database.Database()  # pylint: disable-msg=C0103
             self.local.db = db
             return db
 
@@ -247,7 +250,7 @@ class WetterGUI:
                 return ""
             data = res.json()
             return data["city"]
-        except Exception as e:  # pylint: disable-msg=W0718
+        except Exception as e:  # pylint: disable-msg=W0718,C0103
             self.log.error("Failed to get location: %s", e)
             return ""
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-16 21:52:02 krylon>
+# Time-stamp: <2024-01-17 11:35:27 krylon>
 #
 # /data/code/python/wetterfrosch/dwd.py
 # created on 28. 12. 2023
@@ -67,7 +67,7 @@ class LocationList:
                         else:
                             raise TypeError(
                                 "Patterns must be str or re.Pattern")
-                except Exception as e:
+                except Exception as e:  # pylint: disable-msg=C0103
                     print("Error creating LocationList singleton instance:", e)
                     raise
             if len(patterns) > 0:
@@ -101,7 +101,7 @@ class LocationList:
         with self.lock:
             if len(self.patterns) == 0:
                 return True
-            for p in self.patterns:
+            for p in self.patterns:  # pylint: disable-msg=C0103
                 if p.search(loc) is not None:
                     return True
             return False
@@ -147,7 +147,8 @@ class Client:
                 return None
             self.last_fetch = datetime.now()
             body: Final[str] = res.read().decode()
-            m: Final[Optional[re.Match[str]]] = ENVELOPE_PAT.match(body)
+            m: Final[Optional[re.Match[str]]] = \
+                ENVELOPE_PAT.match(body)  # pylint: disable-msg=C0103
             assert m is not None  # SRSLY?
             payload: Final[str] = m[1]
             records: dict = json.loads(payload)
@@ -156,7 +157,7 @@ class Client:
     def process(self, items: dict) -> Optional[list[data.WeatherWarning]]:
         """Process the data we received from the DWD web site."""
         warnings: list[data.WeatherWarning] = []
-        for w in items["warnings"].values():
+        for w in items["warnings"].values():  # pylint: disable-msg=C0103
             for event in w:
                 if self.loc_patterns.check(event["regionName"]):
                     warning = data.WeatherWarning(event)
