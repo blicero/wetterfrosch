@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # pylint: disable-msg=C0302
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-15 20:34:46 krylon>
+# Time-stamp: <2024-01-18 19:43:38 krylon>
 #
 # /data/code/python/wetterfrosch/test_database.py
 # created on 13. 01. 2024
@@ -97,6 +97,29 @@ class DatabaseTest(unittest.TestCase):
         self.assertGreater(len(keys), 0)
         for k in keys:
             self.assertTrue(db.warning_has_key(k))
+
+    def test_04_db_acknowledge(self) -> None:
+        """Test acknowledging database records."""
+        db = self.__get_db()
+        warnings = db.warning_get_all()
+        self.assertGreater(len(warnings), 0)
+        try:
+            with db:
+                for w in warnings:
+                    self.assertFalse(w.acknowledged)
+                    db.warning_acknowledge(w)
+                    self.assertTrue(w.acknowledged)
+        except Exception as e:  # pylint: disable-msg=W0718
+            self.fail(f"An unexpected exception occured: {e}")
+
+        warnings = db.warning_get_all()
+        for w in warnings:
+            self.assertTrue(w.acknowledged)
+
+        for w in warnings:
+            with self.assertRaises(AssertionError):
+                w.wid = 0
+                db.warning_acknowledge(w)
 
 
 # Test data
