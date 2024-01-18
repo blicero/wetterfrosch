@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-01-18 20:12:39 krylon>
+# Time-stamp: <2024-01-19 00:16:15 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -13,15 +13,16 @@
   German Weather Service (Deutscher Wetterdienst, [[https://www.dwd.de/][DWD]]) and display them.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2024-01-18 Do 20:12]
+   #+CAPTION: Clock summary at [2024-01-19 Fr 00:16]
    | Headline                           | Time      |           |       |      |
    |------------------------------------+-----------+-----------+-------+------|
-   | *Total time*                       | *1d 9:30* |           |       |      |
+   | *Total time*                       | *1d 9:53* |           |       |      |
    |------------------------------------+-----------+-----------+-------+------|
-   | *Wetterfrosch*                     | *1d 9:30* |           |       |      |
-   | \_  /Components [5/9]/             |           | /1d 9:30/ |       |      |
+   | *Wetterfrosch*                     | *1d 9:53* |           |       |      |
+   | \_  /Components [5/9]/             |           | /1d 9:53/ |       |      |
    | \_    Database                     |           |           | 13:03 |      |
-   | \_    Load warnings from DWD [2/3] |           |           |  4:21 |      |
+   | \_    Load warnings from DWD [3/3] |           |           |  4:44 |      |
+   | \_      Use requests library       |           |           |       | 0:23 |
    | \_      Location                   |           |           |       | 1:33 |
    | \_      Testing                    |           |           |       | 0:41 |
    | \_    GUI [2/3]                    |           |           | 16:06 |      |
@@ -50,7 +51,7 @@
     ...
     Turns out, to everyone's complete surprise - yes, I do. Same procedure as
     every year.
-*** DONE Load warnings from DWD [2/3]
+*** DONE Load warnings from DWD [3/3]
     CLOSED: [2024-01-10 Mi 18:53]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
@@ -59,7 +60,11 @@
     :LOGBOOK:
     CLOCK: [2023-12-30 Sa 16:27]--[2023-12-30 Sa 18:34] =>  2:07
     :END:
-**** TODO Use requests library
+**** DONE Use requests library
+     CLOSED: [2024-01-19 Fr 00:16]
+     :LOGBOOK:
+     CLOCK: [2024-01-18 Do 23:53]--[2024-01-19 Fr 00:16] =>  0:23
+     :END:
      I use the requests library to look up our location in the UI, and it has
      a very nice and simple interface. I should use that in the client, too,
      for fetching warnings from DWD. 
