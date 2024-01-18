@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-17 11:36:08 krylon>
+# Time-stamp: <2024-01-18 19:46:57 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -20,7 +20,7 @@ import json
 import pprint
 import queue
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from threading import Lock, Thread, local
 from typing import Any, Final
 
@@ -84,6 +84,9 @@ class WetterGUI:
                     as fh:  # pylint: disable-msg=C0103
                 for line in fh:
                     self.location.append(line.strip())
+
+        db = self.get_database()
+        self.alert_cache = db.warning_get_keys()
 
         self.refresh_worker = Thread(target=self.__refresh_worker, daemon=True)
         self.refresh_worker.start()
@@ -285,37 +288,43 @@ class WetterGUI:
         self.store.clear()
         now: Final[datetime] = datetime.now()
         has_warnings: bool = False
+        db = self.get_database()
+        delta: Final[timedelta] = timedelta(hours=12)
+        delta_d: Final[datetime] = now + delta
         self.log.debug("Displaying data:\n\t%s",
                        pprint.pformat(data))
-        for event in data:
-            d1: datetime = event.start  # pylint: disable-msg=C0103
-            d2: datetime = event.end  # pylint: disable-msg=C0103
+        with db:
+            for event in data:
+                d1: datetime = event.start  # pylint: disable-msg=C0103
+                d2: datetime = event.end  # pylint: disable-msg=C0103
 
-            if d1 <= now <= d2 and not self.__known_alert(event):
-                n = notify2.Notification(  # pylint: disable-msg=C0103
-                    event.headline,
-                    event.description,
-                    ICON_NAME_WARN)
-                n.show()
-                has_warnings = True
-                with self.lock:
-                    self.alert_cache.add(event.cksum())
+                if d1 <= now <= d2 or now <= d1 <= delta_d:
+                    if not self.__known_alert(event):
+                        n = notify2.Notification(  # pylint: disable-msg=C0103
+                            event.headline,
+                            event.description,
+                            ICON_NAME_WARN)
+                        n.show()
+                        has_warnings = True
+                        with self.lock:
+                            self.alert_cache.add(event.cksum())
+                        db.warning_add(event)
 
-            liter = self.store.append()
-            self.store.set(
-                liter,
-                (1, 2, 3, 4, 5, 6, 7, 8),
-                (
-                    event.level,
-                    event.region_name,
-                    d1.strftime(common.TIME_FMT),
-                    d2.strftime(common.TIME_FMT),
-                    event.event,
-                    event.headline,
-                    event.description,
-                    event.instruction,
-                ),
-            )
+                    liter = self.store.append()
+                    self.store.set(
+                        liter,
+                        (1, 2, 3, 4, 5, 6, 7, 8),
+                        (
+                            event.level,
+                            event.region_name,
+                            d1.strftime(common.TIME_FMT),
+                            d2.strftime(common.TIME_FMT),
+                            event.event,
+                            event.headline,
+                            event.description,
+                            event.instruction,
+                        ),
+                    )
 
         if has_warnings:
             self.tray.set_from_icon_name(ICON_NAME_WARN)
