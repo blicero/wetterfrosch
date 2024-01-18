@@ -17,7 +17,7 @@ wetterfrosch.data
 """
 
 # import hashlib
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Final, Optional
 
 
@@ -65,9 +65,11 @@ class WeatherWarning:
         self.level = record["level"]
         self.start = datetime.fromtimestamp(record["start"]/1000)
         if ("end" in record) and record["end"] is not None:
-            self.end = datetime.fromtimestamp(record["end"]/1000 + 14400)
+            self.end = datetime.fromtimestamp(record["end"]/1000)
         else:
             self.end = self.start
+        if self.start == self.end:
+            self.end += timedelta(hours=12)
         self.region_name = record["regionName"]
         self.description = record["description"]
         self.event = record["event"]
