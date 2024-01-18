@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-17 10:28:24 krylon>
+# Time-stamp: <2024-01-18 19:28:59 krylon>
 #
 # /data/code/python/wetterfrosch/data.py
 # created on 12. 01. 2024
@@ -41,6 +41,7 @@ class WeatherWarning:
         "state_short",
         "altitude_start",
         "altitude_end",
+        "acknowledged",
     ]
 
     wid: int
@@ -57,6 +58,7 @@ class WeatherWarning:
     state_short: str
     altitude_start: Optional[int]
     altitude_end: Optional[int]
+    acknowledged: bool
 
     def __init__(self, record: dict, wid: int = 0) -> None:
         self.wid = wid
@@ -78,12 +80,16 @@ class WeatherWarning:
         self.state_short = record["stateShort"]
         self.altitude_end = record["altitudeEnd"]
         self.altitude_start = record["altitudeStart"]
+        if "acknowledged" in record:
+            self.acknowledged = record["acknowledged"]
+        else:
+            self.acknowledged = False
 
     def cksum(self) -> str:
         """Produce a checksum to see if two Warnings are identical."""
         summary: Final[str] = \
             f"{self.start}--{self.end}--{self.region_name}--{self.event}--" + \
-            f"{self.headline}--{self.level}"
+            f"{self.description}--{self.level}"
 
         # cksum: Final[str] = hashlib.sha512(summary.encode()).hexdigest()
         # return cksum

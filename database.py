@@ -57,7 +57,7 @@ INIT_QUERIES: Final[list[str]] = [
                                 '--' ||
                                 event ||
                                 '--' ||
-                                headline ||
+                                description ||
                                 '--' ||
                                 level
                         ) VIRTUAL,
