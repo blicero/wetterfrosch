@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-17 11:35:27 krylon>
+# Time-stamp: <2024-01-19 00:14:45 krylon>
 #
 # /data/code/python/wetterfrosch/dwd.py
 # created on 28. 12. 2023
@@ -19,12 +19,14 @@ wetterfrosch.client
 
 import json
 import logging
+import pprint
 import re
-import urllib.request
 from datetime import datetime, timedelta
 from threading import Lock
 from typing import Any, Final, Optional, Union
 from warnings import warn
+
+import requests  # type: ignore
 
 from wetterfrosch import common, data
 
@@ -141,18 +143,30 @@ class Client:
                           self.last_fetch.strftime(common.TIME_FMT),
                           next_fetch.strftime(common.TIME_FMT))
             return None
-        with urllib.request.urlopen(WARNINGS_URL) as res:
-            if res.status != 200:
-                self.log.error("Failed to fetch data from DWD: %d", res.status)
+
+        try:
+            res = requests.get(WARNINGS_URL, verify=True, timeout=5)
+            if res.status_code != 200:
+                self.log.error("Failed to fetch warnings: %d",
+                               res.status_code)
                 return None
-            self.last_fetch = datetime.now()
-            body: Final[str] = res.read().decode()
+
+            body: Final[str] = res.content.decode()
             m: Final[Optional[re.Match[str]]] = \
                 ENVELOPE_PAT.match(body)  # pylint: disable-msg=C0103
-            assert m is not None  # SRSLY?
+
+            if m is None:
+                self.log.debug("Cannot parse response:\n%s",
+                               body)
+                return None
+
             payload: Final[str] = m[1]
             records: dict = json.loads(payload)
             return records
+        except Exception as e:  # pylint: disable-msg=W0718
+            self.log.error("Failed to fetch weather warnings: %s",
+                           pprint.pformat(e.args))
+            return None
 
     def process(self, items: dict) -> Optional[list[data.WeatherWarning]]:
         """Process the data we received from the DWD web site."""
