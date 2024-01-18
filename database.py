@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-16 17:00:43 krylon>
+# Time-stamp: <2024-01-18 19:56:47 krylon>
 #
 # /data/code/python/wetterfrosch/database.py
 # created on 13. 01. 2024
@@ -19,6 +19,7 @@ wetterfrosch.database
 import logging
 import sqlite3
 import threading
+import time
 from datetime import datetime
 from enum import Enum, auto
 from math import ceil, floor
@@ -48,6 +49,7 @@ INIT_QUERIES: Final[list[str]] = [
         state_short     TEXT NOT NULL,
         altitude_start  INTEGER,
         altitude_end    INTEGER,
+        acknowledged    INTEGER NOT NULL DEFAULT 0,
         key             TEXT GENERATED ALWAYS AS (
                                 start ||
                                 '--' ||
@@ -69,6 +71,7 @@ INIT_QUERIES: Final[list[str]] = [
     "CREATE INDEX wrn_start_idx ON warning (start)",
     "CREATE INDEX wrn_end_idx ON warning (end)",
     "CREATE INDEX wrn_evt_idx ON warning (event)",
+    "CREATE INDEX wrn_ack_idx ON warning (acknowledged)",
 ]
 
 
@@ -80,6 +83,7 @@ class Query(Enum):
     WarningGetAll = auto()
     WarningGetKeys = auto()
     WarningHasKey = auto()
+    WarningAcknowledge = auto()
 
 
 db_queries: Final[dict[Query, str]] = {
@@ -116,7 +120,8 @@ SELECT
     instruction,
     state_short,
     altitude_start,
-    altitude_end
+    altitude_end,
+    acknowledged
 FROM warning
 ORDER BY start, region_name
     """,
@@ -135,7 +140,8 @@ SELECT
     instruction,
     state_short,
     altitude_start,
-    altitude_end
+    altitude_end,
+    acknowledged
 FROM warning
 WHERE start <= ? AND ? <= end -- XXX Needs thorough testing!
 ORDER BY start, region_name
@@ -151,6 +157,11 @@ SELECT
     COUNT(id) AS cnt
  FROM warning
  WHERE key = ?
+    """,
+    Query.WarningAcknowledge: """
+UPDATE warning
+SET acknowledged = ?
+WHERE id = ?
     """,
 }
 
@@ -189,10 +200,12 @@ class Database:
 
     def __create_db(self) -> None:
         """Initialize a freshly created database"""
+        self.log.debug("Initialize fresh database at %s", self.path)
         with self.db:
             for query in INIT_QUERIES:
                 cur: sqlite3.Cursor = self.db.cursor()
                 cur.execute(query)
+        self.log.debug("Database initialized successfully.")
 
     def __enter__(self) -> None:
         self.db.__enter__()
@@ -202,6 +215,11 @@ class Database:
 
     def warning_add(self, w: WeatherWarning) -> None:
         """Add one warning to the database."""
+        self.log.debug("Add warning to database: %s in %s from %s to %s",
+                       w.event,
+                       w.region_name,
+                       w.start.strftime(common.TIME_FMT),
+                       w.end.strftime(common.TIME_FMT))
         cur: Final[sqlite3.Cursor] = self.db.cursor()
         cur.execute(db_queries[Query.WarningAdd],
                     (
@@ -243,6 +261,7 @@ class Database:
                 "stateShort": row[11],
                 "altitudeStart": row[12],
                 "altitudeEnd": row[13],
+                "acknowledged": row[14],
             }
             record = WeatherWarning(raw, row[0])
             results.append(record)
@@ -271,6 +290,7 @@ class Database:
                 "stateShort": row[11],
                 "altitudeStart": row[12],
                 "altitudeEnd": row[13],
+                "acknowledged": row[14],
             }
             record = WeatherWarning(raw, row[0])
             results.append(record)
@@ -278,11 +298,20 @@ class Database:
 
     def warning_get_keys(self) -> set[str]:
         """Return the keys of all warnings stored in the database."""
+        cnt: int = 0
         cur: Final[sqlite3.Cursor] = self.db.cursor()
         cur.execute(db_queries[Query.WarningGetKeys])
         results: set[str] = set()
         for row in cur:
+            cnt += 1
             results.add(row[0])
+        self.log.debug("Found %d warnings in database", cnt)
+        l: int = len(results)
+        if l != cnt:
+            diff: int = cnt - l
+            self.log.debug("Found %d duplicate warnings in database.", diff)
+        # assert (cnt == len(results)), \
+        #     f"Expected {cnt} warnings, only have {len(results)}"
         return results
 
     def warning_has_key(self, key: str) -> bool:
@@ -291,6 +320,15 @@ class Database:
         cur.execute(db_queries[Query.WarningHasKey], (key, ))
         row = cur.fetchone()
         return row[0] > 0
+
+    def warning_acknowledge(self, w: WeatherWarning) -> None:
+        """Mark a WeatherWarning as acknowledged."""
+        assert w.wid > 0
+        stamp: int = int(time.time())
+        cur: Final[sqlite3.Cursor] = self.db.cursor()
+        cur.execute(db_queries[Query.WarningAcknowledge],
+                    (stamp, w.wid))
+        w.acknowledged = True
 
 # Local Variables: #
 # python-indent: 4 #
