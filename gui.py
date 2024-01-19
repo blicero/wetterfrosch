@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-18 19:46:57 krylon>
+# Time-stamp: <2024-01-19 22:10:27 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -19,6 +19,7 @@ wetterfrosch.gui
 import json
 import pprint
 import queue
+import re
 import time
 from datetime import datetime, timedelta
 from threading import Lock, Thread, local
@@ -51,7 +52,7 @@ APP_ID: Final[str] = f"{common.APP_NAME}/{common.APP_VERSION}"
 ICON_NAME_DEFAULT: Final[str] = "weather-storm-symbolic"
 ICON_NAME_WARN: Final[str] = "weather-severe-alert-symbolic"
 FETCH_INTERVAL: Final[int] = 300
-
+NEWLINE: Final[str] = "\n"
 
 IPINFO_URL: Final[str] = "https://ipinfo.io/json"
 
@@ -131,6 +132,7 @@ class WetterGUI:
 
         self.mbox: gtk.Box = gtk.Box(orientation=gtk.Orientation.VERTICAL)
         self.menubar: gtk.MenuBar = gtk.MenuBar()
+
         self.mb_file_item: gtk.MenuItem = \
             gtk.MenuItem.new_with_mnemonic("_Datei")
         self.file_menu: gtk.Menu = gtk.Menu()
@@ -140,6 +142,12 @@ class WetterGUI:
             gtk.MenuItem.new_with_mnemonic("_Beenden")
         self.fm_load_item: gtk.MenuItem = \
             gtk.MenuItem.new_with_mnemonic("_Lade aus Datei...")
+
+        self.mb_edit_item: gtk.MenuItem = \
+            gtk.MenuItem.new_with_mnemonic("_Bearbeiten")
+        self.edit_menu: gtk.Menu = gtk.Menu()
+        self.em_loc_item: gtk.MenuItem = \
+            gtk.MenuItem.new_with_mnemonic("_Orte verwalten")
 
         self.warn_view = gtk.TreeView(model=self.store)
 
@@ -175,6 +183,9 @@ class WetterGUI:
         if common.DEBUG:
             self.file_menu.add(self.fm_load_item)
         self.file_menu.add(self.fm_quit_item)
+
+        self.mb_edit_item.set_submenu(self.edit_menu)
+        self.edit_menu.add(self.em_loc_item)
 
         ################################################################
         # Set up signal handlers #######################################
@@ -409,6 +420,52 @@ class WetterGUI:
                 warnings = self.get_client().process(data)
                 assert warnings is not None
                 self.display_data(warnings)
+        finally:
+            dlg.destroy()
+
+    def edit_locations(self, _ignore: Any) -> None:
+        """Edit the list of location we are interested in."""
+        dlg: gtk.Dialog = gtk.Dialog(
+            title="Bearbeite Orte",
+            parent=self.win,
+        )
+        dlg.add_buttons(
+            gtk.STOCK_CANCEL,
+            gtk.ResponseType.CANCEL,
+            gtk.STOCK_OK,
+            gtk.ResponseType.OK,
+        )
+
+        mbox = dlg.get_content_area()
+        txt: gtk.TextView = gtk.TextView.new()
+        txt.editable = True
+        content: Final[str] = NEWLINE.join(self.locations)
+        txt.get_buffer().set_text(content)
+        mbox.add(txt)
+
+        try:
+            response = dlg.run()
+            if response != gtk.ResponseType.OK:
+                return
+
+            buf = txt.get_buffer()
+            start: gtk.TextIter = buf.get_start_iter()
+            end: gtk.TextIter = buf.get_end_iter()
+            newlist: Final[str] = buf.get_text(start, end, True)
+            if newlist != content:
+                patterns: Final[list[str]] = newlist.split(NEWLINE)
+                valid: bool = True
+                for p in patterns:
+                    try:
+                        r: re.Pattern = re.compile(p, re.I)
+                        assert r is not None
+                    except re.error as e:
+                        self.log.error("Invalid pattern '%s': %s", p, e)
+                        valid = False
+                        break
+                if valid:
+                    with open(common.path.location(), "w", "utf-8") as fh:
+                        fh.write(newlist)
         finally:
             dlg.destroy()
 
