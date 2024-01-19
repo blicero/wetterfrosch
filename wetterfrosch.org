@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-01-19 22:38:22 krylon>
+# Time-stamp: <2024-01-19 23:59:49 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -13,30 +13,31 @@
   German Weather Service (Deutscher Wetterdienst, [[https://www.dwd.de/][DWD]]) and display them.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2024-01-19 Fr 22:38]
+   #+CAPTION: Clock summary at [2024-01-19 Fr 23:59]
    | Headline                           | Time       |            |       |       |
    |------------------------------------+------------+------------+-------+-------|
-   | *Total time*                       | *1d 14:41* |            |       |       |
+   | *Total time*                       | *1d 14:47* |            |       |       |
    |------------------------------------+------------+------------+-------+-------|
-   | *Wetterfrosch*                     | *1d 14:41* |            |       |       |
-   | \_  /Components [5/9]/             |            | /1d 14:41/ |       |       |
+   | *Wetterfrosch*                     | *1d 14:47* |            |       |       |
+   | \_  /Components [7/9]/             |            | /1d 14:47/ |       |       |
    | \_    Database                     |            |            | 13:03 |       |
    | \_    Load warnings from DWD [3/3] |            |            |  4:44 |       |
    | \_      Use requests library       |            |            |       |  0:23 |
    | \_      Location                   |            |            |       |  1:33 |
    | \_      Testing                    |            |            |       |  0:41 |
-   | \_    GUI [2/3]                    |            |            | 20:54 |       |
+   | \_    GUI [2/3]                    |            |            | 21:00 |       |
    | \_      Location management        |            |            |       | 11:45 |
    | \_      Non-blocking refresh       |            |            |       |  3:26 |
    | \_      Tray Icon                  |            |            |       |  1:14 |
    #+END:
 ** Features
-** Components [5/9]
+** Components [7/9]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
   :VISIBILITY: children
   :END:
-*** IMPLEMENT Database
+*** DONE Database
+    CLOSED: [2024-01-19 Fr 23:59]
     :LOGBOOK:
     CLOCK: [2024-01-18 Do 19:18]--[2024-01-18 Do 20:12] =>  0:54
     CLOCK: [2024-01-18 Do 15:40]--[2024-01-18 Do 17:30] =>  1:50
@@ -109,6 +110,7 @@
    :VISIBILITY: children
    :END:
    :LOGBOOK:
+   CLOCK: [2024-01-19 Fr 23:52]--[2024-01-19 Fr 23:58] =>  0:06
    CLOCK: [2024-01-06 Sa 19:24]--[2024-01-06 Sa 20:25] =>  1:01
    CLOCK: [2024-01-05 Fr 19:50]--[2024-01-05 Fr 20:39] =>  0:49
    CLOCK: [2024-01-05 Fr 18:00]--[2024-01-05 Fr 18:35] =>  0:35
@@ -153,11 +155,11 @@
      hints as to how to display a systray icon.
      It has a mechanism for displaying notifications, but ... not for tray icons.
 *** Notifications [0/1]
-   :PROPERTIES:
-   :COOKIE_DATA: todo recursive
-   :VISIBILITY: children
-   :END:
-   Displaying notifications is easy enough.
+    :PROPERTIES:
+    :COOKIE_DATA: todo recursive
+    :VISIBILITY: children
+    :END:
+    Displaying notifications is easy enough.
 **** TODO Make some noise
      It would be nice if I could get some sound to be played. At least
      optionally.
