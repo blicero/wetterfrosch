@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-01-19 00:16:15 krylon>
+# Time-stamp: <2024-01-19 22:38:22 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -13,22 +13,22 @@
   German Weather Service (Deutscher Wetterdienst, [[https://www.dwd.de/][DWD]]) and display them.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2024-01-19 Fr 00:16]
-   | Headline                           | Time      |           |       |      |
-   |------------------------------------+-----------+-----------+-------+------|
-   | *Total time*                       | *1d 9:53* |           |       |      |
-   |------------------------------------+-----------+-----------+-------+------|
-   | *Wetterfrosch*                     | *1d 9:53* |           |       |      |
-   | \_  /Components [5/9]/             |           | /1d 9:53/ |       |      |
-   | \_    Database                     |           |           | 13:03 |      |
-   | \_    Load warnings from DWD [3/3] |           |           |  4:44 |      |
-   | \_      Use requests library       |           |           |       | 0:23 |
-   | \_      Location                   |           |           |       | 1:33 |
-   | \_      Testing                    |           |           |       | 0:41 |
-   | \_    GUI [2/3]                    |           |           | 16:06 |      |
-   | \_      Location management        |           |           |       | 6:57 |
-   | \_      Non-blocking refresh       |           |           |       | 3:26 |
-   | \_      Tray Icon                  |           |           |       | 1:14 |
+   #+CAPTION: Clock summary at [2024-01-19 Fr 22:38]
+   | Headline                           | Time       |            |       |       |
+   |------------------------------------+------------+------------+-------+-------|
+   | *Total time*                       | *1d 14:41* |            |       |       |
+   |------------------------------------+------------+------------+-------+-------|
+   | *Wetterfrosch*                     | *1d 14:41* |            |       |       |
+   | \_  /Components [5/9]/             |            | /1d 14:41/ |       |       |
+   | \_    Database                     |            |            | 13:03 |       |
+   | \_    Load warnings from DWD [3/3] |            |            |  4:44 |       |
+   | \_      Use requests library       |            |            |       |  0:23 |
+   | \_      Location                   |            |            |       |  1:33 |
+   | \_      Testing                    |            |            |       |  0:41 |
+   | \_    GUI [2/3]                    |            |            | 20:54 |       |
+   | \_      Location management        |            |            |       | 11:45 |
+   | \_      Non-blocking refresh       |            |            |       |  3:26 |
+   | \_      Tray Icon                  |            |            |       |  1:14 |
    #+END:
 ** Features
 ** Components [5/9]
@@ -117,6 +117,9 @@
    :END:
 **** TODO Location management
      :LOGBOOK:
+     CLOCK: [2024-01-19 Fr 21:46]--[2024-01-19 Fr 22:38] =>  0:52
+     CLOCK: [2024-01-19 Fr 16:26]--[2024-01-19 Fr 20:19] =>  3:53
+     CLOCK: [2024-01-19 Fr 16:06]--[2024-01-19 Fr 16:09] =>  0:03
      CLOCK: [2024-01-11 Do 16:40]--[2024-01-11 Do 17:47] =>  1:07
      CLOCK: [2024-01-10 Mi 19:05]--[2024-01-11 Do 00:55] =>  5:50
      :END:
