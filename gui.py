@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-19 22:10:27 krylon>
+# Time-stamp: <2024-01-19 23:57:26 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -166,12 +166,18 @@ class WetterGUI:
         # Assemble window and widgets ##################################
         ################################################################
 
-        self.win.add(self.mbox)
-        self.mbox.pack_start(self.menubar, False, True, 0)
-        self.mbox.pack_start(self.scrolled_view, False, True, 0)
+        self.win.add(self.mbox)  # pylint: disable-msg=E1101
+        self.mbox.pack_start(self.menubar,  # pylint: disable-msg=E1101
+                             False,
+                             True,
+                             0)
+        self.mbox.pack_start(self.scrolled_view,  # pylint: disable-msg=E1101
+                             False,
+                             True,
+                             0)
         self.scrolled_view.set_vexpand(True)
         self.scrolled_view.set_hexpand(True)
-        self.scrolled_view.add(self.warn_view)
+        self.scrolled_view.add(self.warn_view)  # pylint: disable-msg=E1101
 
         ################################################################
         # Create menu ##################################################
@@ -199,7 +205,7 @@ class WetterGUI:
         if common.DEBUG:
             self.fm_load_item.connect("activate", self.load_from_file)
 
-        self.win.show_all()
+        self.win.show_all()  # pylint: disable-msg=E1101
         self.visible = True
         glib.timeout_add(2000, self.__check_queue)
 
@@ -225,7 +231,7 @@ class WetterGUI:
         if self.visible:
             self.win.hide()
         else:
-            self.win.show_all()
+            self.win.show_all()  # pylint: disable-msg=E1101
         self.visible = not self.visible
 
     def __quit(self, *_ignore: Any) -> None:
@@ -407,12 +413,12 @@ class WetterGUI:
         )
 
         try:
-            res = dlg.run()
+            res = dlg.run()  # pylint: disable-msg=E1101
             if res != gtk.ResponseType.OK:
                 self.log.debug("Response from FileChooserDialog was {res}")
                 return
 
-            path: Final[str] = dlg.get_filename()
+            path: Final[str] = dlg.get_filename()  # pylint: disable-msg=E1101
             self.log.debug("Read warnings from {path}")
 
             with open(path, "r", encoding="utf-8") as fh:
@@ -423,6 +429,7 @@ class WetterGUI:
         finally:
             dlg.destroy()
 
+    # pylint: disable-msg=R0914
     def edit_locations(self, _ignore: Any) -> None:
         """Edit the list of location we are interested in."""
         dlg: gtk.Dialog = gtk.Dialog(
@@ -439,12 +446,12 @@ class WetterGUI:
         mbox = dlg.get_content_area()
         txt: gtk.TextView = gtk.TextView.new()
         txt.editable = True
-        content: Final[str] = NEWLINE.join(self.locations)
+        content: Final[str] = NEWLINE.join(self.location)
         txt.get_buffer().set_text(content)
         mbox.add(txt)
 
         try:
-            response = dlg.run()
+            response = dlg.run()  # pylint: disable-msg=E1101
             if response != gtk.ResponseType.OK:
                 return
 
@@ -464,7 +471,9 @@ class WetterGUI:
                         valid = False
                         break
                 if valid:
-                    with open(common.path.location(), "w", "utf-8") as fh:
+                    with open(common.path.locations(),
+                              "w",
+                              encoding="utf-8") as fh:
                         fh.write(newlist)
         finally:
             dlg.destroy()
