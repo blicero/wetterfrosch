@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-19 23:57:26 krylon>
+# Time-stamp: <2024-01-20 19:35:59 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -184,6 +184,8 @@ class WetterGUI:
         ################################################################
 
         self.menubar.add(self.mb_file_item)
+        self.menubar.add(self.mb_edit_item)
+
         self.mb_file_item.set_submenu(self.file_menu)
         self.file_menu.add(self.fm_refresh_item)
         if common.DEBUG:
@@ -204,6 +206,7 @@ class WetterGUI:
         self.fm_refresh_item.connect("activate", self.load)
         if common.DEBUG:
             self.fm_load_item.connect("activate", self.load_from_file)
+        self.em_loc_item.connect("activate", self.edit_locations)
 
         self.win.show_all()  # pylint: disable-msg=E1101
         self.visible = True
@@ -354,15 +357,15 @@ class WetterGUI:
             try:
                 dwd: client.Client = self.get_client()
                 raw = dwd.fetch()
-                if raw is None:
-                    self.display_msg("Client did not return any data.")
-                else:
+                if raw is not None:
                     proc = dwd.process(raw)
                     if proc is None or len(proc) == 0:
                         self.display_msg(
                             "No warnings were left after processing.")
                     else:
                         self.queue.put(proc)
+                else:
+                    self.log.error("Client did not return any data.")
             except Exception as e:  # pylint: disable-msg=W0718
                 self.log.error(
                     "Something went wrong refreshing our data: %s",
@@ -449,10 +452,12 @@ class WetterGUI:
         content: Final[str] = NEWLINE.join(self.location)
         txt.get_buffer().set_text(content)
         mbox.add(txt)
+        dlg.show_all()  # pylint: disable-msg=E1101
 
         try:
             response = dlg.run()  # pylint: disable-msg=E1101
             if response != gtk.ResponseType.OK:
+                self.log.debug("Cancel editing of location list")
                 return
 
             buf = txt.get_buffer()
@@ -460,6 +465,7 @@ class WetterGUI:
             end: gtk.TextIter = buf.get_end_iter()
             newlist: Final[str] = buf.get_text(start, end, True)
             if newlist != content:
+                self.log.debug("Location list was modified, checking new list")
                 patterns: Final[list[str]] = newlist.split(NEWLINE)
                 valid: bool = True
                 for p in patterns:
@@ -470,11 +476,20 @@ class WetterGUI:
                         self.log.error("Invalid pattern '%s': %s", p, e)
                         valid = False
                         break
+                    except AssertionError:
+                        self.log.error(
+                            "Failed to compile location to regex: %s",
+                            p)
+                        valid = False
+                        break
                 if valid:
                     with open(common.path.locations(),
                               "w",
                               encoding="utf-8") as fh:
                         fh.write(newlist)
+                    # self.client.update_locations(patterns)
+                    loc_list = client.LocationList()
+                    loc_list.replace(patterns)
         finally:
             dlg.destroy()
 

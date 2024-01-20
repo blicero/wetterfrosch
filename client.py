@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-19 00:14:45 krylon>
+# Time-stamp: <2024-01-20 19:35:28 krylon>
 #
 # /data/code/python/wetterfrosch/dwd.py
 # created on 28. 12. 2023
@@ -95,7 +95,14 @@ class LocationList:
                 pat = re.compile(item, re.I)
                 self.patterns.append(pat)
             else:
+                assert isinstance(item, re.Pattern)
                 self.patterns.append(item)
+
+    def replace(self, items: list[str]) -> None:
+        """Replace the patterns in the LocationList.
+        Assumes that all strings in items are valid regular expressions."""
+        with self.lock:
+            self.patterns = [re.compile(p, re.I) for p in items]
 
     def check(self, loc: str) -> bool:
         """Check if the given string is matched by any of the List's
@@ -162,11 +169,19 @@ class Client:
 
             payload: Final[str] = m[1]
             records: dict = json.loads(payload)
+            self.last_fetch = datetime.now()
             return records
         except Exception as e:  # pylint: disable-msg=W0718
             self.log.error("Failed to fetch weather warnings: %s",
                            pprint.pformat(e.args))
             return None
+
+    def update_locations(self, locations: list[str]) -> None:
+        """Replace the list of locations with the given list."""
+        # self.loc_patterns.replace(locations)
+        self.loc_patterns.clear()
+        for pat in locations:
+            self.loc_patterns.add(pat)
 
     def process(self, items: dict) -> Optional[list[data.WeatherWarning]]:
         """Process the data we received from the DWD web site."""
