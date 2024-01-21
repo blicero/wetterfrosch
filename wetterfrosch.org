@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-01-20 20:48:21 krylon>
+# Time-stamp: <2024-01-21 20:49:13 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -13,19 +13,20 @@
   German Weather Service (Deutscher Wetterdienst, [[https://www.dwd.de/][DWD]]) and display them.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2024-01-20 Sa 19:43]
+   #+CAPTION: Clock summary at [2024-01-21 So 20:49]
    | Headline                           | Time       |            |       |       |      |
    |------------------------------------+------------+------------+-------+-------+------|
-   | *Total time*                       | *1d 15:49* |            |       |       |      |
+   | *Total time*                       | *1d 17:45* |            |       |       |      |
    |------------------------------------+------------+------------+-------+-------+------|
-   | *Wetterfrosch*                     | *1d 15:49* |            |       |       |      |
-   | \_  /Components [7/9]/             |            | /1d 15:49/ |       |       |      |
+   | *Wetterfrosch*                     | *1d 17:45* |            |       |       |      |
+   | \_  /Components [10/12]/           |            | /1d 17:45/ |       |       |      |
+   | \_    Configuration [0/0]          |            |            |  1:56 |       |      |
    | \_    Database                     |            |            | 13:03 |       |      |
-   | \_    Load warnings from DWD [3/3] |            |            |  4:44 |       |      |
+   | \_    Load warnings from DWD [3/4] |            |            |  4:44 |       |      |
    | \_      Use requests library       |            |            |       |  0:23 |      |
    | \_      Location                   |            |            |       |  1:33 |      |
    | \_      Testing                    |            |            |       |  0:41 |      |
-   | \_    GUI [4/4]                    |            |            | 22:02 |       |      |
+   | \_    GUI [4/5]                    |            |            | 22:02 |       |      |
    | \_      Location management [1/1]  |            |            |       | 12:47 |      |
    | \_        Separate window class    |            |            |       |       | 0:01 |
    | \_      Non-blocking refresh       |            |            |       |  3:26 |      |
@@ -41,6 +42,10 @@
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
     :VISIBILITY: children
+    :END:
+    :LOGBOOK:
+    CLOCK: [2024-01-21 So 19:40]--[2024-01-21 So 20:49] =>  1:09
+    CLOCK: [2024-01-21 So 16:49]--[2024-01-21 So 17:36] =>  0:47
     :END:
     The application currently ([2024-01-20 Sa]) uses a lot of hardwired values
     that I would like to make configurable.
