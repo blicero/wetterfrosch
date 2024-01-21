@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-21 20:48:29 krylon>
+# Time-stamp: <2024-01-21 22:13:05 krylon>
 #
 # /data/code/python/wetterfrosch/config.py
 # created on 21. 01. 2024
@@ -79,7 +79,10 @@ class Config:
     def set_option(self, section: str, key: str, value: Any) -> None:
         """Change a setting and save it."""
         self.cfg[section][key] = value
-        # FIXME Save the configuration
+
+        with open(self.path, "w", encoding="utf-8") as fh:
+            output = tomlkit.dumps(self.cfg)
+            fh.write(output)
 
 # Local Variables: #
 # python-indent: 4 #
