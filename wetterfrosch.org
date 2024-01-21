@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-01-20 19:43:19 krylon>
+# Time-stamp: <2024-01-20 20:48:21 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -32,11 +32,20 @@
    | \_      Tray Icon                  |            |            |       |  1:14 |      |
    #+END:
 ** Features
-** Components [7/9]
+** Components [10/12]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
   :VISIBILITY: children
   :END:
+*** MEDITATE Configuration [0/0]
+    :PROPERTIES:
+    :COOKIE_DATA: todo recursive
+    :VISIBILITY: children
+    :END:
+    The application currently ([2024-01-20 Sa]) uses a lot of hardwired values
+    that I would like to make configurable.
+    I think I want to use a good old ini-file, Python used to have good
+    support for reading (and writing?) those.
 *** DONE Database
     CLOSED: [2024-01-19 Fr 23:59]
     :LOGBOOK:
@@ -53,7 +62,7 @@
     ...
     Turns out, to everyone's complete surprise - yes, I do. Same procedure as
     every year.
-*** DONE Load warnings from DWD [3/3]
+*** DONE Load warnings from DWD [3/4]
     CLOSED: [2024-01-10 Mi 18:53]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
@@ -62,6 +71,12 @@
     :LOGBOOK:
     CLOCK: [2023-12-30 Sa 16:27]--[2023-12-30 Sa 18:34] =>  2:07
     :END:
+**** TODO Cache data
+     I would like to cache the data I fetch, so if fetch() is called again
+     before the the next fetch is due, I can return the most recent data.
+     I would also like to persistently save that data and the time I last
+     fetched it, so on restart the Client doesn't bother the server again
+     unnecessarily.
 **** DONE Use requests library
      CLOSED: [2024-01-19 Fr 00:16]
      :LOGBOOK:
@@ -105,7 +120,7 @@
      CLOCK: [2024-01-02 Di 18:43]--[2024-01-02 Di 19:19] =>  0:36
      CLOCK: [2024-01-02 Di 18:23]--[2024-01-02 Di 18:28] =>  0:05
      :END:
-*** GUI [4/4]
+*** GUI [4/5]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -118,6 +133,10 @@
    CLOCK: [2024-01-03 Mi 17:21]--[2024-01-03 Mi 19:15] =>  1:54
    CLOCK: [2024-01-02 Di 19:41]--[2024-01-02 Di 19:51] =>  0:10
    :END:
+**** TODO Fetch interval
+     I would like to edit the Client's fetch interval and make changes to it
+     persistent. And now that I think about it, I should really think about
+     configuration more generally.
 **** DONE Location management [1/1]
      CLOSED: [2024-01-20 Sa 19:42]
      :LOGBOOK:
@@ -132,6 +151,10 @@
      to define custom regexes to match multiple locations. I'd also like for
      that list to be persistent.
      And of course the client should pick up changes to the list at runtime.
+
+     [2024-01-20 Sa 19:43]
+     It works, in a rather awkward way. I should eventually refactor the
+     handling of locations, but for now we're good.
 ***** CANCELLED Separate window class
       CLOSED: [2024-01-20 Sa 19:43]
       :LOGBOOK:
@@ -140,7 +163,7 @@
       I decided I am going to write a separate class for the window to edit
       the location list, instead of using a Dialog. Although I might subclass
       gtk.Dialog
-**** SUSPENDED Non-blocking refresh
+**** DONE Non-blocking refresh
      CLOSED: [2024-01-09 Di 18:11]
      :LOGBOOK:
      CLOCK: [2024-01-08 Mo 20:45]--[2024-01-09 Di 00:11] =>  3:26
@@ -165,21 +188,25 @@
      Wait, no. The documentation for gtk.Application does not give me any
      hints as to how to display a systray icon.
      It has a mechanism for displaying notifications, but ... not for tray icons.
-*** Notifications [0/1]
+*** Notifications [1/1]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
     :VISIBILITY: children
     :END:
     Displaying notifications is easy enough.
-**** TODO Make some noise
+**** SUSPENDED Make some noise
+     CLOSED: [2024-01-20 Sa 19:46]
      It would be nice if I could get some sound to be played. At least
      optionally.
-*** Refactor [0/0]
-    :PROPERTIES:
-    :COOKIE_DATA: todo recursive
-    :VISIBILITY: children
-    :END:
-    I should reorganize things to make the separation of labor between the UI
-    and the client clearer. Especially how we deal with the list of locations.
+** Refactor [0/1]
+   :PROPERTIES:
+   :COOKIE_DATA: todo recursive
+   :VISIBILITY: children
+   :END:
+   I should reorganize things to make the separation of labor between the UI
+   and the client clearer. Especially how we deal with the list of locations.
+*** TODO Location management
+    Editing the location list and propagating changes to the Client is a bit
+    clumsy right now, I'm sure I can do better than this.
 ** Bugs
 
