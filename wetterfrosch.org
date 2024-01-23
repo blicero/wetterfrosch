@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-01-21 22:13:26 krylon>
+# Time-stamp: <2024-01-23 22:19:06 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -13,26 +13,50 @@
   German Weather Service (Deutscher Wetterdienst, [[https://www.dwd.de/][DWD]]) and display them.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2024-01-21 So 22:13]
-   | Headline                           | Time       |            |       |       |      |
-   |------------------------------------+------------+------------+-------+-------+------|
-   | *Total time*                       | *1d 17:49* |            |       |       |      |
-   |------------------------------------+------------+------------+-------+-------+------|
-   | *Wetterfrosch*                     | *1d 17:49* |            |       |       |      |
-   | \_  /Components [10/13]/           |            | /1d 17:49/ |       |       |      |
-   | \_    Configuration [0/0]          |            |            |  2:00 |       |      |
-   | \_    Database                     |            |            | 13:03 |       |      |
-   | \_    Load warnings from DWD [3/4] |            |            |  4:44 |       |      |
-   | \_      Use requests library       |            |            |       |  0:23 |      |
-   | \_      Location                   |            |            |       |  1:33 |      |
-   | \_      Testing                    |            |            |       |  0:41 |      |
-   | \_    GUI [4/5]                    |            |            | 22:02 |       |      |
-   | \_      Location management [1/1]  |            |            |       | 12:47 |      |
-   | \_        Separate window class    |            |            |       |       | 0:01 |
-   | \_      Non-blocking refresh       |            |            |       |  3:26 |      |
-   | \_      Tray Icon                  |            |            |       |  1:14 |      |
+   #+CAPTION: Clock summary at [2024-01-23 Di 22:19]
+   | Headline                           | Time       |            |         |       |      |
+   |------------------------------------+------------+------------+---------+-------+------|
+   | *Total time*                       | *2d 18:06* |            |         |       |      |
+   |------------------------------------+------------+------------+---------+-------+------|
+   | *Wetterfrosch*                     | *2d 18:06* |            |         |       |      |
+   | \_  /Features [1/1]/               |            | /1d 0:17/  |         |       |      |
+   | \_    More data [0/0]              |            |            | 1d 0:17 |       |      |
+   | \_  /Components [10/13]/           |            | /1d 17:49/ |         |       |      |
+   | \_    Configuration [0/0]          |            |            |    2:00 |       |      |
+   | \_    Database                     |            |            |   13:03 |       |      |
+   | \_    Load warnings from DWD [3/4] |            |            |    4:44 |       |      |
+   | \_      Use requests library       |            |            |         |  0:23 |      |
+   | \_      Location                   |            |            |         |  1:33 |      |
+   | \_      Testing                    |            |            |         |  0:41 |      |
+   | \_    GUI [4/5]                    |            |            |   22:02 |       |      |
+   | \_      Location management [1/1]  |            |            |         | 12:47 |      |
+   | \_        Separate window class    |            |            |         |       | 0:01 |
+   | \_      Non-blocking refresh       |            |            |         |  3:26 |      |
+   | \_      Tray Icon                  |            |            |         |  1:14 |      |
    #+END:
-** Features
+** Features [1/1]
+   :PROPERTIES:
+   :COOKIE_DATA: todo recursive
+   :VISIBILITY: children
+   :END:
+*** CANCELLED More data [0/0]
+    CLOSED: [2024-01-23 Di 17:49]
+    :PROPERTIES:
+    :COOKIE_DATA: todo recursive
+    :VISIBILITY: children
+    :END:
+    :LOGBOOK:
+    CLOCK: [2024-01-22 Mo 17:32]--[2024-01-23 Di 17:49] => 24:17
+    :END:
+    DWD has a public API that allows one to query a lot more than just
+    warnings. I'd like to look into that and see what I might be able to do
+    with that.
+
+    [2024-01-23 Di 17:46]
+    After looking into the offering at https://opendata.dwd.de/ and
+    https://dwd.api.bund.dev/ for about 2 hours, I've decided that *if* there
+    is something interesting in there, it's currently too much trouble to find
+    it.
 ** Components [10/13]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
@@ -96,7 +120,7 @@
      :LOGBOOK:
      CLOCK: [2024-01-09 Di 18:26]--[2024-01-09 Di 19:59] =>  1:33
      :END:
-     I currently use a hardwire list of regular expressions to filter which
+     I currently use a hardwired list of regular expressions to filter which
      warnings are relevant to me (okay, it's *one* regular expression). I
      would like to make that configurable at runtime.
      Ideally, it would be nice if I could detect the current location
