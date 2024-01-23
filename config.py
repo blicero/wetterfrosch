@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-21 22:13:05 krylon>
+# Time-stamp: <2024-01-23 14:22:39 krylon>
 #
 # /data/code/python/wetterfrosch/config.py
 # created on 21. 01. 2024
@@ -27,8 +27,6 @@ from wetterfrosch import common
 defaults: Final[str] = """
 # Time-stamp: <2024-01-21 17:33:44 krylon>
 [common]
-# Directory to store application-specific files in
-basedir = "~/.wetterfrosch.d"
 
 [client]
 # List of locations to display warnings for.
