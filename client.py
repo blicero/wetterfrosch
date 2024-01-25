@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-20 19:35:28 krylon>
+# Time-stamp: <2024-01-25 16:00:29 krylon>
 #
 # /data/code/python/wetterfrosch/dwd.py
 # created on 28. 12. 2023
@@ -21,6 +21,7 @@ import json
 import logging
 import pprint
 import re
+import time
 from datetime import datetime, timedelta
 from threading import Lock
 from typing import Any, Final, Optional, Union
@@ -142,7 +143,8 @@ class Client:
             self.loc_patterns = LocationList.new()
         self.last_fetch = datetime.fromtimestamp(0)
 
-    def fetch(self) -> Optional[dict]:
+    # pylint: disable-msg=R0911
+    def fetch(self, attempt: int = 5) -> Optional[dict]:
         """Fetch the current list of warnings from DWD."""
         next_fetch = self.last_fetch + self.interval
         if next_fetch > datetime.now():
@@ -153,10 +155,18 @@ class Client:
 
         try:
             res = requests.get(WARNINGS_URL, verify=True, timeout=5)
-            if res.status_code != 200:
-                self.log.error("Failed to fetch warnings: %d",
-                               res.status_code)
-                return None
+            match res.status_code:
+                case 200:
+                    pass
+                case 403:
+                    if attempt > 0:
+                        time.sleep(1)
+                        return self.fetch(attempt - 1)
+                    return None
+                case _:
+                    self.log.error("Failed to fetch warnings: %d",
+                                   res.status_code)
+                    return None
 
             body: Final[str] = res.content.decode()
             m: Final[Optional[re.Match[str]]] = \
