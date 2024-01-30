@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-30 15:36:43 krylon>
+# Time-stamp: <2024-01-30 21:21:07 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -140,14 +140,20 @@ class WetterGUI:
             gtk.MenuItem.new_with_mnemonic("_Aktualisieren")
         self.fm_quit_item: gtk.MenuItem = \
             gtk.MenuItem.new_with_mnemonic("_Beenden")
-        self.fm_load_item: gtk.MenuItem = \
-            gtk.MenuItem.new_with_mnemonic("_Lade aus Datei...")
 
         self.mb_edit_item: gtk.MenuItem = \
             gtk.MenuItem.new_with_mnemonic("_Bearbeiten")
         self.edit_menu: gtk.Menu = gtk.Menu()
         self.em_loc_item: gtk.MenuItem = \
             gtk.MenuItem.new_with_mnemonic("_Orte verwalten")
+
+        self.mb_debug_item: gtk.MenuItem = \
+            gtk.MenuItem.new_with_mnemonic("Debu_g")
+        self.debug_menu: gtk.Menu = gtk.Menu()
+        self.db_load_item: gtk.MenuItem = \
+            gtk.MenuItem.new_with_mnemonic("_Lade aus Datei...")
+        self.db_msg_item: gtk.MenuItem = \
+            gtk.MenuItem.new_with_mnemonic("_Nachricht anzeigen")
 
         self.warn_view = gtk.TreeView(model=self.store)
 
@@ -185,15 +191,18 @@ class WetterGUI:
 
         self.menubar.add(self.mb_file_item)
         self.menubar.add(self.mb_edit_item)
+        self.menubar.add(self.mb_debug_item)
 
         self.mb_file_item.set_submenu(self.file_menu)
         self.file_menu.add(self.fm_refresh_item)
-        if common.DEBUG:
-            self.file_menu.add(self.fm_load_item)
         self.file_menu.add(self.fm_quit_item)
 
         self.mb_edit_item.set_submenu(self.edit_menu)
         self.edit_menu.add(self.em_loc_item)
+
+        self.mb_debug_item.set_submenu(self.debug_menu)
+        self.debug_menu.add(self.db_load_item)
+        self.debug_menu.add(self.db_msg_item)
 
         ################################################################
         # Set up signal handlers #######################################
@@ -204,9 +213,9 @@ class WetterGUI:
         self.tray.connect("button-press-event", self.tray_menu)
         self.fm_quit_item.connect("activate", self.__quit)
         self.fm_refresh_item.connect("activate", self.load)
-        if common.DEBUG:
-            self.fm_load_item.connect("activate", self.load_from_file)
         self.em_loc_item.connect("activate", self.edit_locations)
+        self.db_load_item.connect("activate", self.load_from_file)
+        self.db_msg_item.connect("activate", self.dbg_display_msg)
 
         self.win.show_all()  # pylint: disable-msg=E1101
         self.visible = True
@@ -498,6 +507,13 @@ class WetterGUI:
                     loc_list.replace(patterns)
         finally:
             dlg.destroy()
+
+    def dbg_display_msg(self, _ignore: Any) -> None:
+        """Display a random message for debugging purposes"""
+        try:
+            self.display_msg("Bla bla bla")
+        finally:
+            self.log.debug("We displayed a message")
 
 
 def main() -> None:
