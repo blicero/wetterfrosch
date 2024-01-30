@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-20 19:35:59 krylon>
+# Time-stamp: <2024-01-30 15:36:43 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -299,9 +299,10 @@ class WetterGUI:
         dlg.show_all()  # pylint: disable-msg=E1101
 
         try:
-            dlg.run()  # pylint: disable-msg=E1101
+            _ = dlg.run()  # pylint: disable-msg=E1101
         finally:
             dlg.destroy()
+            self.log.debug("We are still alive!")
 
     def display_data(self, data: list[WeatherWarning]) -> None:
         """Display weather warnings."""
@@ -360,17 +361,22 @@ class WetterGUI:
                 if raw is not None:
                     proc = dwd.process(raw)
                     if proc is None or len(proc) == 0:
-                        self.display_msg(
+                        # self.display_msg(
+                        self.log.debug(
                             "No warnings were left after processing.")
                     else:
                         self.queue.put(proc)
+                    self.log.debug("Refresh worker is still alive.")
                 else:
-                    self.log.error("Client did not return any data.")
+                    self.log.info("Client did not return any data.")
             except Exception as e:  # pylint: disable-msg=W0718
                 self.log.error(
                     "Something went wrong refreshing our data: %s",
                     e)
             finally:
+                self.log.debug(
+                    "Refresh worker is going to sleep for %f seconds.",
+                    FETCH_INTERVAL)
                 time.sleep(FETCH_INTERVAL)
 
     def __check_queue(self) -> bool:
@@ -488,7 +494,7 @@ class WetterGUI:
                               encoding="utf-8") as fh:
                         fh.write(newlist)
                     # self.client.update_locations(patterns)
-                    loc_list = client.LocationList()
+                    loc_list = client.LocationList.new()
                     loc_list.replace(patterns)
         finally:
             dlg.destroy()
