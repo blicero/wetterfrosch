@@ -1,5 +1,5 @@
 [tool.pylint.main]
-# Time-stamp: <2024-01-17 11:35:22 krylon>
+# Time-stamp: <2024-01-31 20:08:34 krylon>
 # Analyse import fallback blocks. This can be used to support both Python 2 and 3
 # compatible code, which means that the block might have code that exists only in
 # one or another interpreter, leading to false positives when analysed.
@@ -299,7 +299,7 @@ indent-string = "    "
 max-line-length = 100
 
 # Maximum number of lines in a module.
-max-module-lines = 1000
+max-module-lines = 5000
 
 # Allow the body of a class to be on the same line as the declaration if body
 # contains single statement.
