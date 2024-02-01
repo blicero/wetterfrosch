@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-25 16:00:29 krylon>
+# Time-stamp: <2024-01-31 20:03:46 krylon>
 #
 # /data/code/python/wetterfrosch/dwd.py
 # created on 28. 12. 2023
 # (c) 2023 Benjamin Walkenhorst
 #
-# This file is part of the Vox audiobook reader. It is distributed under the
+# This file is part of the Wetterfrosch weather app. It is distributed under the
 # terms of the GNU General Public License 3. See the file LICENSE for details
 # or find a copy online at https://www.gnu.org/licenses/gpl-3.0
 
