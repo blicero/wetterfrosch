@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-31 21:12:30 krylon>
+# Time-stamp: <2024-02-01 18:31:41 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -25,7 +25,7 @@ import sys
 import time
 from datetime import datetime, timedelta
 from threading import Lock, Thread, local
-from typing import Any, Final
+from typing import Any, Final, Optional
 
 import gi  # type: ignore
 import krylib
@@ -372,11 +372,11 @@ class WetterGUI:
                 if raw is not None:
                     proc = dwd.process(raw)
                     if proc is None or len(proc) == 0:
-                        self.display_msg(
+                        self.log.debug(
                             "No warnings were left after processing.")
                     else:
                         self.queue.put(proc)
-                    self.log.debug("Refresh worker is still alive.")
+                    # self.log.debug("Refresh worker is still alive.")
                 else:
                     self.log.info("Client did not return any data.")
             except Exception as e:  # pylint: disable-msg=W0718
@@ -391,7 +391,7 @@ class WetterGUI:
 
     def __check_queue(self) -> bool:
         try:
-            self.log.debug("Checking queue for new warnings")
+            # self.log.debug("Checking queue for new warnings")
             if not self.queue.empty():
                 nelem: Final[int] = self.queue.qsize()
                 if nelem > 0:
@@ -417,7 +417,7 @@ class WetterGUI:
                 return True
             proc = c.process(raw)
             if proc is None or len(proc) == 0:
-                self.display_msg("No warnings were left after processing.")
+                self.log.debug("No warnings were left after processing.")
                 return True
             self.display_data(proc)
             return True
@@ -532,7 +532,7 @@ def main() -> None:
 
 
 if __name__ == '__main__':
-    display: str = os.getenv("DISPLAY")
+    display: Optional[str] = os.getenv("DISPLAY")
     if display is None or display == "":
         print("Environment variable DISPLAY not set, using ':0.0' as default")
         os.environ["DISPLAY"] = ":0.0"
