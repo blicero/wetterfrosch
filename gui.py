@@ -17,9 +17,11 @@ wetterfrosch.gui
 """
 
 import json
+import os
 import pprint
 import queue
 import re
+import sys
 import time
 from datetime import datetime, timedelta
 from threading import Lock, Thread, local
@@ -370,8 +372,7 @@ class WetterGUI:
                 if raw is not None:
                     proc = dwd.process(raw)
                     if proc is None or len(proc) == 0:
-                        # self.display_msg(
-                        self.log.debug(
+                        self.display_msg(
                             "No warnings were left after processing.")
                     else:
                         self.queue.put(proc)
@@ -389,10 +390,17 @@ class WetterGUI:
                 time.sleep(FETCH_INTERVAL)
 
     def __check_queue(self) -> bool:
-        if not self.queue.empty():
-            if self.queue.qsize() > 0:
-                item = self.queue.get()
-                self.display_data(item)
+        try:
+            self.log.debug("Checking queue for new warnings")
+            if not self.queue.empty():
+                nelem: Final[int] = self.queue.qsize()
+                if nelem > 0:
+                    self.log.debug("%d elements found in queue", nelem)
+                    item = self.queue.get()
+                    self.display_data(item)
+        except:  # noqa: B001,E722  pylint: disable-msg=W0702
+            self.log.error("Error while checking queue: %s",
+                           sys.exception())
         return True
 
     def __known_alert(self, alert: WeatherWarning) -> bool:
@@ -524,6 +532,10 @@ def main() -> None:
 
 
 if __name__ == '__main__':
+    display: str = os.getenv("DISPLAY")
+    if display is None or display == "":
+        print("Environment variable DISPLAY not set, using ':0.0' as default")
+        os.environ["DISPLAY"] = ":0.0"
     main()
 
 # Local Variables: #
