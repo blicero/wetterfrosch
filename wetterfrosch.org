@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-02-01 18:31:10 krylon>
+# Time-stamp: <2024-02-01 18:39:29 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -36,13 +36,12 @@
    | \_  /Bugs [1/1]/                   |            | /4:21/     |         |       |      |
    | \_    Crash nach Dialog            |            |            |    4:21 |       |      |
    #+END:
-** Features [1/1]
+** Features [0/1]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
    :END:
-*** CANCELLED More data [0/0]
-    CLOSED: [2024-01-23 Di 17:49]
+*** TODO More data [0/0]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
     :VISIBILITY: children
@@ -59,7 +58,13 @@
     https://dwd.api.bund.dev/ for about 2 hours, I've decided that *if* there
     is something interesting in there, it's currently too much trouble to find
     it.
-** Components [10/13]
+
+    [2024-02-01 Do 18:33]
+    I found an open weather API called [[https://pirate-weather.apiable.io/][Pirate Weather]] and registered for a
+    free API key that allows me to make 10,000 requests per month (~320 per
+    day, about one every five minutes). I have not looked into their API yet,
+    my API key is *bqiCjEJd20p0mCOJhCDC6Cs1AoCHOhzg*.
+** Components [10/14]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
   :VISIBILITY: children
@@ -78,8 +83,8 @@
     that I would like to make configurable.
     I think I want to use a good old ini-file, Python used to have good
     support for reading (and writing?) those.
-*** DONE Database
-    CLOSED: [2024-01-19 Fr 23:59]
+*** DONE Database [0/1]
+    CLOSED: [2024-02-01 Do 18:37]
     :LOGBOOK:
     CLOCK: [2024-01-18 Do 19:18]--[2024-01-18 Do 20:12] =>  0:54
     CLOCK: [2024-01-18 Do 15:40]--[2024-01-18 Do 17:30] =>  1:50
@@ -94,6 +99,14 @@
     ...
     Turns out, to everyone's complete surprise - yes, I do. Same procedure as
     every year.
+**** TODO Replace queue with database
+     :LOGBOOK:
+     CLOCK: [2024-02-01 Do 18:39]
+     :END:
+     I think I should replace the queue I use to transfer warnings from the
+     client to the GUI with the database itself. The client simply stores its
+     data there, the GUI queries the database for current warnings. Much
+     cleaner and less error-prone.
 *** DONE Load warnings from DWD [3/4]
     CLOSED: [2024-01-10 Mi 18:53]
     :PROPERTIES:
