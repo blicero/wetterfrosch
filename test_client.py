@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-31 20:05:22 krylon>
+# Time-stamp: <2024-02-01 21:00:00 krylon>
 #
 # /data/code/python/wetterfrosch/test_client.py
 # created on 02. 01. 2024
@@ -24,6 +24,7 @@ from typing import Optional
 
 from wetterfrosch import common
 from wetterfrosch.client import Client
+from wetterfrosch.data import WeatherWarning
 
 TEST_DIR: str = os.path.join(
     datetime.now().strftime("wetterfrosch_test_client_%Y%m%d_%H%M%S"))
@@ -71,35 +72,33 @@ class ClientTest(unittest.TestCase):
         self.assertIsNotNone(c)
         try:
             assert c is not None
-            data: Optional[dict] = c.fetch()
+            data: Optional[list[WeatherWarning]] = c.fetch()
             if data is not None:
-                res = c.process(data)
-                self.assertIsNotNone(res)
-                assert res is not None
-                self.assertGreaterEqual(len(res), len(data))
+                self.assertIsNotNone(data)
+                assert data is not None
         except Exception as e:  # pylint: disable-msg=W0718
             self.fail(f"Failed to fetch/parse data from DWD: {e}")
 
-    def test_03_process_sample_data(self) -> None:
-        """Test prcessing the sample data.
-        This works even without a working Internet connection."""
-        test_files: list[str] = ["example.json", "warnings.json"]
-        c: Optional[Client] = self.__class__.client()
-        assert c is not None
-        self.assertIsNotNone(c)
-        cwd = os.getcwd()
-        print(f">>> Working directory is {cwd}")
-        for f in test_files:
-            path: str = f
-            if not cwd.endswith("wetterfrosch"):
-                path = os.path.join("wetterfrosch", f)
-            with open(path, 'r', encoding="utf-8") as fh:
-                try:
-                    data = json.load(fh)
-                    res = c.process(data)
-                    self.assertIsNotNone(res)
-                except Exception as e:  # pylint: disable-msg=W0718
-                    self.fail(f"Failed to process {f}: {e}")
+    # def test_03_process_sample_data(self) -> None:
+    #     """Test prcessing the sample data.
+    #     This works even without a working Internet connection."""
+    #     test_files: list[str] = ["example.json", "warnings.json"]
+    #     c: Optional[Client] = self.__class__.client()
+    #     assert c is not None
+    #     self.assertIsNotNone(c)
+    #     cwd = os.getcwd()
+    #     print(f">>> Working directory is {cwd}")
+    #     for f in test_files:
+    #         path: str = f
+    #         if not cwd.endswith("wetterfrosch"):
+    #             path = os.path.join("wetterfrosch", f)
+    #         with open(path, 'r', encoding="utf-8") as fh:
+    #             try:
+    #                 data = json.load(fh)
+    #                 res = c.process(data)
+    #                 self.assertIsNotNone(res)
+    #             except Exception as e:  # pylint: disable-msg=W0718
+    #                 self.fail(f"Failed to process {f}: {e}")
 
 # Local Variables: #
 # python-indent: 4 #

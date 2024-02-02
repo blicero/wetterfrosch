@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-31 20:03:46 krylon>
+# Time-stamp: <2024-02-01 20:45:46 krylon>
 #
 # /data/code/python/wetterfrosch/dwd.py
 # created on 28. 12. 2023
@@ -29,7 +29,7 @@ from warnings import warn
 
 import requests  # type: ignore
 
-from wetterfrosch import common, data
+from wetterfrosch import common, data, database
 
 WARNINGS_URL: Final[str] = \
     "https://www.dwd.de/DWD/warnungen/warnapp/json/warnings.json"
@@ -125,12 +125,16 @@ class Client:
         "interval",
         "loc_patterns",
         "log",
+        "db",
+        "cache",
     ]
 
     log: logging.Logger
     last_fetch: datetime
     loc_patterns: LocationList
     interval: timedelta
+    db: database.Database
+    cache: Optional[list[data.WeatherWarning]]
 
     _loc: list[str] = []
 
@@ -141,17 +145,19 @@ class Client:
             self.loc_patterns = LocationList.new(*patterns)
         else:
             self.loc_patterns = LocationList.new()
+        self.db = database.Database()
         self.last_fetch = datetime.fromtimestamp(0)
+        self.cache = None
 
     # pylint: disable-msg=R0911
-    def fetch(self, attempt: int = 5) -> Optional[dict]:
+    def fetch(self, attempt: int = 5) -> Optional[list[data.WeatherWarning]]:
         """Fetch the current list of warnings from DWD."""
         next_fetch = self.last_fetch + self.interval
         if next_fetch > datetime.now():
             self.log.info("Last fetch was %s, next fetch is not due until %s",
                           self.last_fetch.strftime(common.TIME_FMT),
                           next_fetch.strftime(common.TIME_FMT))
-            return None
+            return self.cache
 
         try:
             res = requests.get(WARNINGS_URL, verify=True, timeout=5)
@@ -179,8 +185,19 @@ class Client:
 
             payload: Final[str] = m[1]
             records: dict = json.loads(payload)
+            processed: list[data.WeatherWarning] = []
             self.last_fetch = datetime.now()
-            return records
+            with self.db:
+                for block in records["warnings"].values():
+                    for item in block:
+                        w = data.WeatherWarning(item)
+                        if self.loc_patterns.check(w.region_name):
+                            processed.append(w)
+                        if not self.db.warning_has_key(w.cksum()):
+                            self.db.warning_add(w)
+
+            self.cache = processed
+            return processed
         except Exception as e:  # pylint: disable-msg=W0718
             self.log.error("Failed to fetch weather warnings: %s",
                            pprint.pformat(e.args))
@@ -193,16 +210,16 @@ class Client:
         for pat in locations:
             self.loc_patterns.add(pat)
 
-    def process(self, items: dict) -> Optional[list[data.WeatherWarning]]:
-        """Process the data we received from the DWD web site."""
-        warnings: list[data.WeatherWarning] = []
-        for w in items["warnings"].values():  # pylint: disable-msg=C0103
-            for event in w:
-                if self.loc_patterns.check(event["regionName"]):
-                    warning = data.WeatherWarning(event)
-                    warnings.append(warning)
-                    break
-        return warnings
+    # def process(self, items: dict) -> Optional[list[data.WeatherWarning]]:
+    #     """Process the data we received from the DWD web site."""
+    #     warnings: list[data.WeatherWarning] = []
+    #     for w in items["warnings"].values():  # pylint: disable-msg=C0103
+    #         for event in w:
+    #             if self.loc_patterns.check(event["regionName"]):
+    #                 warning = data.WeatherWarning(event)
+    #                 warnings.append(warning)
+    #                 break
+    #     return warnings
 
 
 # Local Variables: #
