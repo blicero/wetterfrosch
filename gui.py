@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-03 17:54:56 krylon>
+# Time-stamp: <2024-02-03 19:48:27 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
 # (c) 2024 Benjamin Walkenhorst
 #
-# This file is part of the Wetterfrosch weather app. It is distributed under the
-# terms of the GNU General Public License 3. See the file LICENSE for details
-# or find a copy online at https://www.gnu.org/licenses/gpl-3.0
+# This file is part of the Wetterfrosch weather app. It is distributed
+# under the terms of the GNU General Public License 3. See the file
+# LICENSE for details or find a copy online at
+# https://www.gnu.org/licenses/gpl-3.0
 
 """
 wetterfrosch.gui
@@ -18,11 +19,9 @@ wetterfrosch.gui
 
 import json
 import os
-import pprint
-import queue
 import re
-import sys
 import time
+import traceback
 from datetime import datetime, timedelta
 from threading import Lock, Thread, local
 from typing import Any, Final, Optional
@@ -69,7 +68,6 @@ class WetterGUI:
         self.lock: Final[Lock] = Lock()
         self.local = local()
         self.alert_cache: set[str] = set()
-        self.queue: queue.SimpleQueue = queue.SimpleQueue()
         self.visible: bool = False
         self.active: bool = True
 
@@ -91,7 +89,9 @@ class WetterGUI:
         db = self.get_database()
         self.alert_cache = db.warning_get_keys()
 
-        self.refresh_worker = Thread(target=self.__refresh_worker, daemon=True)
+        self.refresh_worker = Thread(
+            target=self.__refresh_worker,
+            daemon=True)
         self.refresh_worker.start()
 
         ################################################################
@@ -221,7 +221,8 @@ class WetterGUI:
 
         self.win.show_all()  # pylint: disable-msg=E1101
         self.visible = True
-        glib.timeout_add(2000, self.__check_queue)
+        # glib.timeout_add(2000, self.__check_queue)
+        glib.timeout_add(10000, self.__get_warnings)
 
     def get_client(self) -> client.Client:
         """Get the Client instance for the calling thread."""
@@ -320,43 +321,39 @@ class WetterGUI:
         self.store.clear()
         now: Final[datetime] = datetime.now()
         has_warnings: bool = False
-        db = self.get_database()
         delta: Final[timedelta] = timedelta(hours=12)
         delta_d: Final[datetime] = now + delta
-        self.log.debug("Displaying data:\n\t%s",
-                       pprint.pformat(data))
-        with db:
-            for event in data:
-                d1: datetime = event.start  # pylint: disable-msg=C0103
-                d2: datetime = event.end  # pylint: disable-msg=C0103
+        for event in data:
+            d1: datetime = event.start  # pylint: disable-msg=C0103
+            d2: datetime = event.end  # pylint: disable-msg=C0103
 
-                if d1 <= now <= d2 or now <= d1 <= delta_d:
-                    if not self.__known_alert(event):
-                        n = notify2.Notification(  # pylint: disable-msg=C0103
-                            event.headline,
-                            event.description,
-                            ICON_NAME_WARN)
-                        n.show()
-                        has_warnings = True
-                        with self.lock:
-                            self.alert_cache.add(event.cksum())
-                        db.warning_add(event)
+            if d1 <= now <= d2 or now <= d1 <= delta_d:
+                if not self.__known_alert(event):
+                    n = notify2.Notification(  # pylint: disable-msg=C0103
+                        event.headline,
+                        event.description,
+                        ICON_NAME_WARN)
+                    n.show()
+                    has_warnings = True
+                    with self.lock:
+                        self.alert_cache.add(event.cksum())
 
-                    liter = self.store.append()
-                    self.store.set(
-                        liter,
-                        (1, 2, 3, 4, 5, 6, 7, 8),
-                        (
-                            event.level,
-                            event.region_name,
-                            d1.strftime(common.TIME_FMT),
-                            d2.strftime(common.TIME_FMT),
-                            event.event,
-                            event.headline,
-                            event.description,
-                            event.instruction,
-                        ),
-                    )
+                liter = self.store.append()
+                self.store.set(
+                    liter,
+                    (0, 1, 2, 3, 4, 5, 6, 7, 8),
+                    (
+                        event.wid,
+                        event.level,
+                        event.region_name,
+                        d1.strftime(common.TIME_FMT),
+                        d2.strftime(common.TIME_FMT),
+                        event.event,
+                        event.headline,
+                        event.description,
+                        event.instruction,
+                    ),
+                )
 
         if has_warnings:
             self.tray.set_from_icon_name(ICON_NAME_WARN)
@@ -368,17 +365,7 @@ class WetterGUI:
         while self.is_active():
             try:
                 dwd: client.Client = self.get_client()
-                raw = dwd.fetch()
-                if raw is not None:
-                    proc = raw
-                    if proc is None or len(proc) == 0:
-                        self.log.debug(
-                            "No warnings were left after processing.")
-                    else:
-                        self.queue.put(proc)
-                    # self.log.debug("Refresh worker is still alive.")
-                else:
-                    self.log.info("Client did not return any data.")
+                dwd.fetch()
             except Exception as e:  # pylint: disable-msg=W0718
                 self.log.error(
                     "Something went wrong refreshing our data: %s",
@@ -389,18 +376,21 @@ class WetterGUI:
                     FETCH_INTERVAL)
                 time.sleep(FETCH_INTERVAL)
 
-    def __check_queue(self) -> bool:
+    def __get_warnings(self) -> bool:
         try:
-            # self.log.debug("Checking queue for new warnings")
-            if not self.queue.empty():
-                nelem: Final[int] = self.queue.qsize()
-                if nelem > 0:
-                    self.log.debug("%d elements found in queue", nelem)
-                    item = self.queue.get()
-                    self.display_data(item)
-        except:  # noqa: B001,E722  pylint: disable-msg=W0702
-            self.log.error("Error while checking queue: %s",
-                           sys.exception())
+            d1 = datetime.now() - timedelta(hours=2)
+            d2 = datetime.now() + timedelta(hours=12)
+            locations = client.LocationList.new()
+            db = self.get_database()
+            warnings = db.warning_get_by_period(d1, d2)
+            dwarnings: list[WeatherWarning] = []
+            for w in warnings:
+                if not locations.check(w.region_name):
+                    continue
+                dwarnings.append(w)
+            self.display_data(dwarnings)
+        except Exception as e:  # pylint: disable-msg=W0718
+            self.log.error("Error processing warnings: %s", e)
         return True
 
     def __known_alert(self, alert: WeatherWarning) -> bool:
@@ -423,6 +413,7 @@ class WetterGUI:
             return True
         except Exception as e:  # pylint: disable-msg=W0718
             self.log.error("Something went wrong refreshing our data: %s", e)
+            traceback.print_exception(e)
             return True
 
     def load_from_file(self, _ignore: Any) -> None:
