@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-01 18:31:41 krylon>
+# Time-stamp: <2024-02-03 17:54:56 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -370,7 +370,7 @@ class WetterGUI:
                 dwd: client.Client = self.get_client()
                 raw = dwd.fetch()
                 if raw is not None:
-                    proc = dwd.process(raw)
+                    proc = raw
                     if proc is None or len(proc) == 0:
                         self.log.debug(
                             "No warnings were left after processing.")
@@ -415,7 +415,7 @@ class WetterGUI:
             if raw is None:
                 self.display_msg("Client did not return any data.")
                 return True
-            proc = c.process(raw)
+            proc = raw
             if proc is None or len(proc) == 0:
                 self.log.debug("No warnings were left after processing.")
                 return True
@@ -449,7 +449,7 @@ class WetterGUI:
 
             with open(path, "r", encoding="utf-8") as fh:
                 data = json.load(fh)
-                warnings = self.get_client().process(data)
+                warnings = data
                 assert warnings is not None
                 self.display_data(warnings)
         finally:
