@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-01 20:45:46 krylon>
+# Time-stamp: <2024-02-03 19:46:13 krylon>
 #
 # /data/code/python/wetterfrosch/dwd.py
 # created on 28. 12. 2023
@@ -127,6 +127,7 @@ class Client:
         "log",
         "db",
         "cache",
+        "known",
     ]
 
     log: logging.Logger
@@ -135,6 +136,7 @@ class Client:
     interval: timedelta
     db: database.Database
     cache: Optional[list[data.WeatherWarning]]
+    known: set[str]
 
     _loc: list[str] = []
 
@@ -148,6 +150,7 @@ class Client:
         self.db = database.Database()
         self.last_fetch = datetime.fromtimestamp(0)
         self.cache = None
+        self.known = self.db.warning_get_keys()
 
     # pylint: disable-msg=R0911
     def fetch(self, attempt: int = 5) -> Optional[list[data.WeatherWarning]]:
@@ -193,8 +196,10 @@ class Client:
                         w = data.WeatherWarning(item)
                         if self.loc_patterns.check(w.region_name):
                             processed.append(w)
-                        if not self.db.warning_has_key(w.cksum()):
-                            self.db.warning_add(w)
+                        if not w.cksum() in self.known:
+                            if not self.db.warning_has_key(w.cksum()):
+                                self.db.warning_add(w)
+                            self.known.add(w.cksum())
 
             self.cache = processed
             return processed
