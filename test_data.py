@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-01 22:18:21 krylon>
+# Time-stamp: <2024-02-03 17:55:39 krylon>
 #
 # /data/code/python/wetterfrosch/test_data.py
 # created on 01. 02. 2024
@@ -47,7 +47,7 @@ class DataTest(unittest.TestCase):
                 for item in block:
                     try:
                         _ = WeatherWarning(item)
-                    except Exception as e:
+                    except Exception as e:  # pylint: disable-msg=W0718
                         self.fail(f"Error processing weather data: {e}")
 
 # Local Variables: #
