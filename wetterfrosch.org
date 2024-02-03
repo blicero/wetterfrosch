@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-02-01 18:39:29 krylon>
+# Time-stamp: <2024-02-03 19:51:33 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -13,28 +13,29 @@
   German Weather Service (Deutscher Wetterdienst, [[https://www.dwd.de/][DWD]]) and display them.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2024-02-01 Do 18:31]
-   | Headline                           | Time       |            |         |       |      |
-   |------------------------------------+------------+------------+---------+-------+------|
-   | *Total time*                       | *2d 23:09* |            |         |       |      |
-   |------------------------------------+------------+------------+---------+-------+------|
-   | *Wetterfrosch*                     | *2d 23:09* |            |         |       |      |
-   | \_  /Features [1/1]/               |            | /1d 0:17/  |         |       |      |
-   | \_    More data [0/0]              |            |            | 1d 0:17 |       |      |
-   | \_  /Components [10/13]/           |            | /1d 18:31/ |         |       |      |
-   | \_    Configuration [0/0]          |            |            |    2:00 |       |      |
-   | \_    Database                     |            |            |   13:03 |       |      |
-   | \_    Load warnings from DWD [3/4] |            |            |    4:44 |       |      |
-   | \_      Use requests library       |            |            |         |  0:23 |      |
-   | \_      Location                   |            |            |         |  1:33 |      |
-   | \_      Testing                    |            |            |         |  0:41 |      |
-   | \_    GUI [4/5]                    |            |            |   22:44 |       |      |
-   | \_      Location management [1/1]  |            |            |         | 13:29 |      |
-   | \_        Separate window class    |            |            |         |       | 0:01 |
-   | \_      Non-blocking refresh       |            |            |         |  3:26 |      |
-   | \_      Tray Icon                  |            |            |         |  1:14 |      |
-   | \_  /Bugs [1/1]/                   |            | /4:21/     |         |       |      |
-   | \_    Crash nach Dialog            |            |            |    4:21 |       |      |
+   #+CAPTION: Clock summary at [2024-02-03 Sa 19:51]
+   | Headline                            | Time      |            |         |       |      |
+   |-------------------------------------+-----------+------------+---------+-------+------|
+   | *Total time*                        | *3d 4:20* |            |         |       |      |
+   |-------------------------------------+-----------+------------+---------+-------+------|
+   | *Wetterfrosch*                      | *3d 4:20* |            |         |       |      |
+   | \_  /Features [0/1]/                |           | /1d 0:17/  |         |       |      |
+   | \_    More data [0/0]               |           |            | 1d 0:17 |       |      |
+   | \_  /Components [11/14]/            |           | /1d 23:42/ |         |       |      |
+   | \_    Configuration [0/0]           |           |            |    2:00 |       |      |
+   | \_    Database [1/1]                |           |            |   18:14 |       |      |
+   | \_      Replace queue with database |           |            |         |  5:11 |      |
+   | \_    Load warnings from DWD [3/4]  |           |            |    4:44 |       |      |
+   | \_      Use requests library        |           |            |         |  0:23 |      |
+   | \_      Location                    |           |            |         |  1:33 |      |
+   | \_      Testing                     |           |            |         |  0:41 |      |
+   | \_    GUI [4/5]                     |           |            |   22:44 |       |      |
+   | \_      Location management [1/1]   |           |            |         | 13:29 |      |
+   | \_        Separate window class     |           |            |         |       | 0:01 |
+   | \_      Non-blocking refresh        |           |            |         |  3:26 |      |
+   | \_      Tray Icon                   |           |            |         |  1:14 |      |
+   | \_  /Bugs [1/1]/                    |           | /4:21/     |         |       |      |
+   | \_    Crash nach Dialog             |           |            |    4:21 |       |      |
    #+END:
 ** Features [0/1]
    :PROPERTIES:
@@ -64,7 +65,7 @@
     free API key that allows me to make 10,000 requests per month (~320 per
     day, about one every five minutes). I have not looked into their API yet,
     my API key is *bqiCjEJd20p0mCOJhCDC6Cs1AoCHOhzg*.
-** Components [10/14]
+** Components [11/14]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
   :VISIBILITY: children
@@ -83,7 +84,7 @@
     that I would like to make configurable.
     I think I want to use a good old ini-file, Python used to have good
     support for reading (and writing?) those.
-*** DONE Database [0/1]
+*** DONE Database [1/1]
     CLOSED: [2024-02-01 Do 18:37]
     :LOGBOOK:
     CLOCK: [2024-01-18 Do 19:18]--[2024-01-18 Do 20:12] =>  0:54
@@ -99,9 +100,11 @@
     ...
     Turns out, to everyone's complete surprise - yes, I do. Same procedure as
     every year.
-**** TODO Replace queue with database
+**** DONE Replace queue with database
+     CLOSED: [2024-02-03 Sa 19:51]
      :LOGBOOK:
-     CLOCK: [2024-02-01 Do 18:39]
+     CLOCK: [2024-02-03 Sa 18:02]--[2024-02-03 Sa 19:51] =>  1:49
+     CLOCK: [2024-02-01 Do 18:39]--[2024-02-01 Do 22:01] =>  3:22
      :END:
      I think I should replace the queue I use to transfer warnings from the
      client to the GUI with the database itself. The client simply stores its
