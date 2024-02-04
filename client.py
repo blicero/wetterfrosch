@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-03 22:55:24 krylon>
+# Time-stamp: <2024-02-04 22:34:19 krylon>
 #
 # /data/code/python/wetterfrosch/dwd.py
 # created on 28. 12. 2023
@@ -38,7 +38,9 @@ ENVELOPE_PAT: Final[re.Pattern] = \
     re.compile(r"^warnWetter[.]loadWarnings\((.*)\);", re.DOTALL)
 
 PIRATE_URL: Final[str] = \
-    "https://api.pirateweather.net/forecast/bqiCjEJd20p0mCOJhCDC6Cs1AoCHOhzg/52.0333,8.5333"
+    "https://api.pirateweather.net/forecast" + \
+    "/bqiCjEJd20p0mCOJhCDC6Cs1AoCHOhzg" + \
+    "/52.0333,8.5333"
 
 
 class LocationList:
@@ -120,48 +122,58 @@ class LocationList:
             return False
 
 
+# pylint: disable-msg=R0902
 class Client:
     """Client fetches weather warnings from the DWD web site."""
 
     __slots__ = [
-        "last_fetch",
-        "interval",
+        "last_wfetch",
+        "winterval",
         "loc_patterns",
         "log",
         "db",
         "cache",
         "known",
+        "last_ffetch",
+        "finterval",
+        "fcache",
     ]
 
     log: logging.Logger
-    last_fetch: datetime
+    last_wfetch: datetime
     loc_patterns: LocationList
-    interval: timedelta
+    winterval: timedelta
+    last_ffetch: datetime
+    finterval: timedelta
     db: database.Database
     cache: Optional[list[data.WeatherWarning]]
     known: set[str]
+    fcache: Optional[dict[str, Any]]
 
     _loc: list[str] = []
 
     def __init__(self, interval: int = 30, patterns: Optional[list[str]] = None) -> None:  # noqa: E501 pylint: disable-msg=C0301
         self.log = common.get_logger("client")
-        self.interval = timedelta(seconds=interval)
+        self.winterval = timedelta(seconds=interval)
+        self.finterval = timedelta(seconds=600)
         if patterns is not None:
             self.loc_patterns = LocationList.new(*patterns)
         else:
             self.loc_patterns = LocationList.new()
         self.db = database.Database()
-        self.last_fetch = datetime.fromtimestamp(0)
+        self.last_wfetch = datetime.fromtimestamp(0)
+        self.last_ffetch = datetime.fromtimestamp(0)
         self.cache = None
         self.known = self.db.warning_get_keys()
+        self.fcache = None
 
     # pylint: disable-msg=R0911
     def fetch(self, attempt: int = 5) -> Optional[list[data.WeatherWarning]]:
         """Fetch the current list of warnings from DWD."""
-        next_fetch = self.last_fetch + self.interval
+        next_fetch = self.last_wfetch + self.winterval
         if next_fetch > datetime.now():
             self.log.info("Last fetch was %s, next fetch is not due until %s",
-                          self.last_fetch.strftime(common.TIME_FMT),
+                          self.last_wfetch.strftime(common.TIME_FMT),
                           next_fetch.strftime(common.TIME_FMT))
             return self.cache
 
@@ -192,7 +204,7 @@ class Client:
             payload: Final[str] = m[1]
             records: dict = json.loads(payload)
             processed: list[data.WeatherWarning] = []
-            self.last_fetch = datetime.now()
+            self.last_wfetch = datetime.now()
             with self.db:
                 for block in records["warnings"].values():
                     for item in block:
@@ -217,6 +229,33 @@ class Client:
         self.loc_patterns.clear()
         for pat in locations:
             self.loc_patterns.add(pat)
+
+    def fetch_weather(self) -> Optional[dict[str, Any]]:
+        """Fetch weather data from Pirate Weather"""
+        next_fetch: Final[datetime] = self.last_ffetch + self.finterval
+        if next_fetch > datetime.now():
+            self.log.info("Last fetch was %s, next fetch is not due until %s",
+                          self.last_ffetch.strftime(common.TIME_FMT),
+                          next_fetch.strftime(common.TIME_FMT))
+            return self.fcache
+        try:
+            res = requests.get(PIRATE_URL, verify=True, timeout=5)
+            match res.status_code:
+                case 200:
+                    pass
+                case code:
+                    self.log.error("Failed to fetch forecast: %d", code)
+                    return None
+
+            body: Final[str] = res.content.decode()
+            records: dict[str, Any] = json.loads(body)
+            self.last_ffetch = datetime.now()
+            self.fcache = records
+            return records
+        except Exception as e:  # pylint: disable-msg=W0718
+            self.log.error("Failed to fetch weather forecast: %s",
+                           pprint.pformat(e.args))
+            return None
 
     # def process(self, items: dict) -> Optional[list[data.WeatherWarning]]:
     #     """Process the data we received from the DWD web site."""
