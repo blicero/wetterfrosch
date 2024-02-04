@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-03 19:48:27 krylon>
+# Time-stamp: <2024-02-03 20:29:47 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -285,6 +285,7 @@ class WetterGUI:
             if res.status_code != 200:
                 return ""
             data = res.json()
+            self.coords = [ float(x) for x in data["loc"].split(",") ]
             return data["city"]
         except Exception as e:  # pylint: disable-msg=W0718,C0103
             self.log.error("Failed to get location: %s", e)

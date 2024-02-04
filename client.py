@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-03 19:46:13 krylon>
+# Time-stamp: <2024-02-03 22:55:24 krylon>
 #
 # /data/code/python/wetterfrosch/dwd.py
 # created on 28. 12. 2023
@@ -36,6 +36,9 @@ WARNINGS_URL: Final[str] = \
 
 ENVELOPE_PAT: Final[re.Pattern] = \
     re.compile(r"^warnWetter[.]loadWarnings\((.*)\);", re.DOTALL)
+
+PIRATE_URL: Final[str] = \
+    "https://api.pirateweather.net/forecast/bqiCjEJd20p0mCOJhCDC6Cs1AoCHOhzg/52.0333,8.5333"
 
 
 class LocationList:
