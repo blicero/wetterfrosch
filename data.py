@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-31 20:04:42 krylon>
+# Time-stamp: <2024-02-05 20:02:14 krylon>
 #
 # /data/code/python/wetterfrosch/data.py
 # created on 12. 01. 2024
@@ -18,7 +18,7 @@ wetterfrosch.data
 
 # import hashlib
 from datetime import datetime, timedelta
-from typing import Final, Optional
+from typing import Any, Final, Optional
 
 
 # pylint: disable-msg=R0902,R0903
@@ -94,6 +94,106 @@ class WeatherWarning:
         # cksum: Final[str] = hashlib.sha512(summary.encode()).hexdigest()
         # return cksum
         return summary
+
+
+humid_table: Final[dict[int, int]] = {
+    16: 99,
+    17: 93,
+    18: 88,
+    19: 83,
+    20: 78,
+    21: 74,
+    22: 70,
+    23: 66,
+    24: 62,
+    25: 59,
+    26: 56,
+    27: 53,
+    28: 50,
+    29: 47,
+    30: 43,
+    31: 43,
+    32: 40,
+    33: 38,
+    34: 36,
+    35: 35,
+    36: 33,
+    37: 31,
+}
+
+
+class Forecast:
+    """Current weather data / forecast as obtained by Pirate Weather"""
+
+    __slots__ = [
+        "fid",
+        "timestamp",
+        "location",
+        "summary",
+        "probability_rain",
+        "temperature",
+        "temperature_apparent",
+        "humidity",
+        "wind_speed",
+        "visibility",
+    ]
+
+    fid: int
+    timestamp: datetime
+    location: tuple[float, float]
+    summary: str
+    probability_rain: int
+    temperature: int
+    temperature_apparent: float
+    humidity: int
+    wind_speed: int
+    visibility: float
+
+    def __init__(self, forecast: dict, fid: int = 0) -> None:
+        assert fid >= 0
+        self.fid = fid
+        self.timestamp = datetime.fromtimestamp(forecast["currently"]["time"])
+        self.location = (forecast["latitude"], forecast["longitude"])
+        self.summary = forecast["currently"]["summary"]
+        self.probability_rain = \
+            int(forecast["currently"]["precipProbability"] * 100)
+        self.temperature = int(forecast["currently"]["temperature"])
+        self.temperature_apparent = \
+            int(forecast["currently"]["apparentTemperature"])
+        self.humidity = int(forecast["currently"]["humidity"] * 100)
+        self.wind_speed = \
+            int(forecast["currently"]["windSpeed"])
+        self.visibility = forecast["currently"]["visibility"]
+
+    @classmethod
+    def from_db(cls, row: tuple) -> Any:
+        """Construct a Forecast instance from the database row."""
+        loc = [float(x) for x in row[2].split("/")]
+        fc = cls.__new__(cls)
+        fc.fid = row[0]
+        fc.timestamp = datetime.fromtimestamp(row[1])
+        fc.location = (loc[0], loc[1])
+        fc.summary = row[3]
+        fc.probability_rain = row[4]
+        fc.temperature = row[5]
+        fc.temperature_apparent = row[6]
+        fc.humidity = row[7]
+        fc.wind_speed = row[8]
+        fc.visibility = row[9]
+        return fc
+
+    def is_humid(self) -> bool:
+        """Return True if it's humid by central European standards."""
+        humid: bool = False
+        match self.temperature:
+            case x if x < 16:
+                humid = False
+            case x if x in humid_table:
+                humid = self.humidity >= humid_table[x]
+            case _:
+                humid = False
+        return humid
+
 
 # local Variables: #
 # python-indent: 4 #
