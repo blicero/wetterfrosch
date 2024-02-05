@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # pylint: disable-msg=C0302
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-31 20:05:34 krylon>
+# Time-stamp: <2024-02-05 20:28:02 krylon>
 #
 # /data/code/python/wetterfrosch/test_database.py
 # created on 13. 01. 2024
@@ -19,17 +19,21 @@ wetterfrosch.test_database
 
 import json
 import os
+import sys
 import unittest
 from datetime import datetime
 from typing import Final
 
+import krylib
 from krylib import isdir
 
 from wetterfrosch import common, database
-from wetterfrosch.data import WeatherWarning
+from wetterfrosch.data import Forecast, WeatherWarning
 
 TEST_ROOT: str = "/tmp/"
 
+# On my main development machines, I have a RAM disk mounted at /data/ram.
+# If it's available, I'd rather use that than /tmp which might live on disk.
 if isdir("/data/ram"):
     TEST_ROOT = "/data/ram"
 
@@ -120,6 +124,22 @@ class DatabaseTest(unittest.TestCase):
             with self.assertRaises(AssertionError):
                 w.wid = 0
                 db.warning_acknowledge(w)
+
+    def test_05_forecast_add(self) -> None:
+        """Test adding forecast data"""
+        sample_files = ["weather.json", "weather2.json"]
+        db = self.__get_db()
+        for f in sample_files:
+            if not krylib.fexist(f):
+                continue
+            try:
+                with open(f, "r", encoding="utf-8") as fh:
+                    raw = json.load(fh)
+                    fc: Forecast = Forecast(raw)
+                    with db:
+                        db.forecast_add(fc)
+            except:  # noqa: E722,B001  pylint: disable-msg=W0702
+                self.fail(f"Unhandled exception: {sys.exception()}")
 
 
 # Test data

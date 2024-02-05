@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-31 20:04:28 krylon>
+# Time-stamp: <2024-02-05 20:29:02 krylon>
 #
 # /data/code/python/wetterfrosch/database.py
 # created on 13. 01. 2024
@@ -23,12 +23,12 @@ import time
 from datetime import datetime
 from enum import Enum, auto
 from math import ceil, floor
-from typing import Final
+from typing import Final, Optional
 
 import krylib
 
 from wetterfrosch import common
-from wetterfrosch.data import WeatherWarning
+from wetterfrosch.data import Forecast, WeatherWarning
 
 OPEN_LOCK: Final[threading.Lock] = threading.Lock()
 
@@ -72,6 +72,25 @@ INIT_QUERIES: Final[list[str]] = [
     "CREATE INDEX wrn_end_idx ON warning (end)",
     "CREATE INDEX wrn_evt_idx ON warning (event)",
     "CREATE INDEX wrn_ack_idx ON warning (acknowledged)",
+    """
+CREATE TABLE forecast (
+    id INTEGER PRIMARY KEY,
+    timestamp INTEGER UNIQUE NOT NULL,
+    location TEXT NOT NULL,
+    summary TEXT NOT NULL,
+    prob_rain INTEGER NOT NULL,
+    temperature INTEGER NOT NULL,
+    temperature_apparent INTEGER NOT NULL,
+    humidity INTEGER NOT NULL,
+    wind_speed INTEGER NOT NULL,
+    visibility REAL NOT NULL,
+    CHECK (prob_rain >= 0),
+    CHECK (temperature BETWEEN -60 AND 50),
+    CHECK (humidity >= 0),
+    CHECK (wind_speed >= 0),
+    CHECK (visibility >= 0)
+) STRICT""",
+    "CREATE UNIQUE INDEX fc_time_idx ON forecast (timestamp)",
 ]
 
 
@@ -84,6 +103,10 @@ class Query(Enum):
     WarningGetKeys = auto()
     WarningHasKey = auto()
     WarningAcknowledge = auto()
+    ForecastAdd = auto()
+    ForecastGetCurrent = auto()
+    ForecastGetRecent = auto()
+    ForecastGetByPeriod = auto()
 
 
 db_queries: Final[dict[Query, str]] = {
@@ -163,6 +186,69 @@ UPDATE warning
 SET acknowledged = ?
 WHERE id = ?
     """,
+    Query.ForecastAdd: """
+INSERT INTO forecast
+    (timestamp,
+     location,
+     summary,
+     prob_rain,
+     temperature,
+     temperature_apparent,
+     humidity,
+     wind_speed,
+     visibility)
+    VALUES
+    (?, ?, ?, ?, ?, ?, ?, ?, ?)
+RETURNING id
+    """,
+    Query.ForecastGetCurrent: """
+SELECT
+    id,
+    timestamp,
+    location,
+    summary,
+    prob_rain,
+    temperature,
+    temperature_apparent,
+    humidity,
+    wind_speed,
+    visibility
+FROM forecast
+ORDER BY timestamp DESC
+LIMIT 1
+    """,
+    Query.ForecastGetRecent: """
+SELECT
+    id,
+    timestamp,
+    location,
+    summary,
+    prob_rain,
+    temperature,
+    temperature_apparent,
+    humidity,
+    wind_speed,
+    visibility
+FROM forecast
+ORDER BY timestamp DESC
+LIMIT ?
+    """,
+    Query.ForecastGetByPeriod: """
+SELECT
+    id,
+    timestamp,
+    location,
+    summary,
+    prob_rain,
+    temperature,
+    temperature_apparent,
+    humidity,
+    wind_speed,
+    visibility
+FROM forecast
+WHERE timestamp BETWEEN ? AND ?
+ORDER BY timestamp
+""",
 }
 
 
@@ -329,6 +415,48 @@ class Database:
         cur.execute(db_queries[Query.WarningAcknowledge],
                     (stamp, w.wid))
         w.acknowledged = True
+
+    def forecast_add(self, fc: Forecast) -> None:
+        """Add a Forecast to the database."""
+        self.log.debug("Add Forecast to database: %s @ %s %d °C, %d %% humidity.",
+                       fc.timestamp.strftime(common.TIME_FMT),
+                       fc.location,
+                       fc.temperature,
+                       fc.humidity)
+        cur: Final[sqlite3.Cursor] = self.db.cursor()
+        cur.execute(db_queries[Query.ForecastAdd],
+                    (
+                        int(fc.timestamp.timestamp()),
+                        f"{fc.location[0]}/{fc.location[1]}",
+                        fc.summary,
+                        fc.probability_rain,
+                        fc.temperature,
+                        fc.temperature_apparent,
+                        fc.humidity,
+                        fc.wind_speed,
+                        fc.visibility,
+                    ))
+        row = cur.fetchone()
+        fc.fid = row[0]
+
+    def forecast_get_current(self) -> Optional[Forecast]:
+        """Return the most recent Forecast from the database."""
+        cur: Final[sqlite3.Cursor] = self.db.cursor()
+        cur.execute(db_queries[Query.ForecastGetCurrent])
+        row = cur.fetchone()
+        if row is None:
+            return None
+        return Forecast.from_db(row)
+
+    def forecast_get_recent(self, n: int = 5) -> list[Forecast]:
+        """Get the <n> most recent Forecast items."""
+        cur: Final[sqlite3.Cursor] = self.db.cursor()
+        cur.execute(db_queries[Query.ForecastGetRecent], (n, ))
+        records: list[Forecast] = []
+        for row in cur:
+            fc = Forecast.from_db(row)
+            records.append(fc)
+        return records
 
 # Local Variables: #
 # python-indent: 4 #
