@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-01-31 20:04:11 krylon>
+# Time-stamp: <2024-02-06 14:50:54 krylon>
 #
 # /data/code/python/wetterfrosch/config.py
 # created on 21. 01. 2024
@@ -60,9 +60,9 @@ class Config:
         self.log = common.get_logger("config")
 
         if not krylib.fexist(self.path):
-            self.log.info("Configuration file %s does not exist, creating " +
-                          "new file with default settings.",
-                          self.path)
+            self.log.info(
+                "Configuration file %s does not exist, creating new file with default settings.",
+                self.path)
             with open(self.path, "w", encoding="utf-8") as fh:
                 fh.write(defaults)
 
