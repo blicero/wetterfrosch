@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-05 20:02:14 krylon>
+# Time-stamp: <2024-02-06 15:04:06 krylon>
 #
 # /data/code/python/wetterfrosch/data.py
 # created on 12. 01. 2024
@@ -130,6 +130,7 @@ class Forecast:
         "timestamp",
         "location",
         "summary",
+        "icon",
         "probability_rain",
         "temperature",
         "temperature_apparent",
@@ -142,6 +143,7 @@ class Forecast:
     timestamp: datetime
     location: tuple[float, float]
     summary: str
+    icon: str
     probability_rain: int
     temperature: int
     temperature_apparent: float
@@ -155,6 +157,7 @@ class Forecast:
         self.timestamp = datetime.fromtimestamp(forecast["currently"]["time"])
         self.location = (forecast["latitude"], forecast["longitude"])
         self.summary = forecast["currently"]["summary"]
+        self.icon = forecast["currently"]["icon"]
         self.probability_rain = \
             int(forecast["currently"]["precipProbability"] * 100)
         self.temperature = int(forecast["currently"]["temperature"])
@@ -174,12 +177,13 @@ class Forecast:
         fc.timestamp = datetime.fromtimestamp(row[1])
         fc.location = (loc[0], loc[1])
         fc.summary = row[3]
-        fc.probability_rain = row[4]
-        fc.temperature = row[5]
-        fc.temperature_apparent = row[6]
-        fc.humidity = row[7]
-        fc.wind_speed = row[8]
-        fc.visibility = row[9]
+        fc.icon = row[4]
+        fc.probability_rain = row[5]
+        fc.temperature = row[6]
+        fc.temperature_apparent = row[7]
+        fc.humidity = row[8]
+        fc.wind_speed = row[9]
+        fc.visibility = row[10]
         return fc
 
     def is_humid(self) -> bool:

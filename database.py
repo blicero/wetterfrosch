@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-05 20:29:02 krylon>
+# Time-stamp: <2024-02-06 15:03:17 krylon>
 #
 # /data/code/python/wetterfrosch/database.py
 # created on 13. 01. 2024
@@ -78,6 +78,7 @@ CREATE TABLE forecast (
     timestamp INTEGER UNIQUE NOT NULL,
     location TEXT NOT NULL,
     summary TEXT NOT NULL,
+    icon TEXT NOT NULL,
     prob_rain INTEGER NOT NULL,
     temperature INTEGER NOT NULL,
     temperature_apparent INTEGER NOT NULL,
@@ -191,6 +192,7 @@ INSERT INTO forecast
     (timestamp,
      location,
      summary,
+     icon,
      prob_rain,
      temperature,
      temperature_apparent,
@@ -198,7 +200,7 @@ INSERT INTO forecast
      wind_speed,
      visibility)
     VALUES
-    (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 RETURNING id
     """,
     Query.ForecastGetCurrent: """
@@ -207,6 +209,7 @@ SELECT
     timestamp,
     location,
     summary,
+    icon,
     prob_rain,
     temperature,
     temperature_apparent,
@@ -223,6 +226,7 @@ SELECT
     timestamp,
     location,
     summary,
+    icon,
     prob_rain,
     temperature,
     temperature_apparent,
@@ -239,6 +243,7 @@ SELECT
     timestamp,
     location,
     summary,
+    icon,
     prob_rain,
     temperature,
     temperature_apparent,
@@ -429,6 +434,7 @@ class Database:
                         int(fc.timestamp.timestamp()),
                         f"{fc.location[0]}/{fc.location[1]}",
                         fc.summary,
+                        fc.icon,
                         fc.probability_rain,
                         fc.temperature,
                         fc.temperature_apparent,

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # pylint: disable-msg=C0302
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-05 20:28:02 krylon>
+# Time-stamp: <2024-02-06 15:00:20 krylon>
 #
 # /data/code/python/wetterfrosch/test_database.py
 # created on 13. 01. 2024
@@ -140,6 +140,38 @@ class DatabaseTest(unittest.TestCase):
                         db.forecast_add(fc)
             except:  # noqa: E722,B001  pylint: disable-msg=W0702
                 self.fail(f"Unhandled exception: {sys.exception()}")
+
+    def test_06_forecast_get_current(self) -> None:
+        """Test fetching the most recent forecast."""
+        db = self.__get_db()
+        try:
+            fc = db.forecast_get_current()
+            self.assertIsNotNone(fc)
+            self.assertIsInstance(fc, Forecast)
+        except Exception as e:  # pylint: disable-msg=W0718
+            self.fail(f"Error fetching current forecast: {e}")
+
+    def test_07_forecast_get_recent(self) -> None:
+        """Test getting recent weather data from the database."""
+        db = self.__get_db()
+        try:
+            items = db.forecast_get_recent()
+            self.assertIsNotNone(items)
+            self.assertIsInstance(items, list)
+            for i in items:
+                self.assertIsNotNone(i)
+                self.assertIsInstance(i, Forecast)
+            self.assertEqual(len(items), 2)
+
+            items = db.forecast_get_recent(1)
+            self.assertIsNotNone(items)
+            self.assertIsInstance(items, list)
+            for i in items:
+                self.assertIsNotNone(i)
+                self.assertIsInstance(i, Forecast)
+            self.assertEqual(len(items), 1)
+        except Exception as e:  # pylint: disable-msg=W0718
+            self.fail(f"Error fetching current forecast: {e}")
 
 
 # Test data
