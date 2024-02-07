@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-06 15:03:17 krylon>
+# Time-stamp: <2024-02-06 20:07:43 krylon>
 #
 # /data/code/python/wetterfrosch/database.py
 # created on 13. 01. 2024
@@ -423,11 +423,12 @@ class Database:
 
     def forecast_add(self, fc: Forecast) -> None:
         """Add a Forecast to the database."""
-        self.log.debug("Add Forecast to database: %s @ %s %d °C, %d %% humidity.",
-                       fc.timestamp.strftime(common.TIME_FMT),
-                       fc.location,
-                       fc.temperature,
-                       fc.humidity)
+        self.log.debug(
+            "Add Forecast to database: %s @ %s %d °C, %d %% humidity.",
+            fc.timestamp.strftime(common.TIME_FMT),
+            fc.location,
+            fc.temperature,
+            fc.humidity)
         cur: Final[sqlite3.Cursor] = self.db.cursor()
         cur.execute(db_queries[Query.ForecastAdd],
                     (

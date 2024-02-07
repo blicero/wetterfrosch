@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-04 22:33:48 krylon>
+# Time-stamp: <2024-02-06 21:43:26 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -70,6 +70,9 @@ class WetterGUI:
         self.alert_cache: set[str] = set()
         self.visible: bool = False
         self.active: bool = True
+        self.coords: list[float] = [0, 0]
+        self.here: str = ""
+        self.here_stamp: datetime = datetime.fromtimestamp(0)
 
         self.location: list[str] = []
         loc: str = self.get_location()
@@ -157,6 +160,35 @@ class WetterGUI:
         self.db_msg_item: gtk.MenuItem = \
             gtk.MenuItem.new_with_mnemonic("_Nachricht anzeigen")
 
+        self.fc_grid: gtk.Grid = gtk.Grid.new()
+        self.fc_lbl_time: gtk.Label = gtk.Label.new("Zeit")
+        self.fc_lbl_loc: gtk.Label = gtk.Label.new("Ort")
+        self.fc_lbl_summary: gtk.Label = gtk.Label.new("Wetterlage")
+        self.fc_lbl_prob_rain: gtk.Label = gtk.Label.new("Regen")
+        self.fc_lbl_temp: gtk.Label = gtk.Label.new("Temperatur")
+        self.fc_lbl_humid: gtk.Label = gtk.Label.new("Luftfeuchtigkeit")
+        self.fc_lbl_wind: gtk.Label = gtk.Label.new("Windgeschwindigkeit")
+        self.fc_view_time: gtk.TextView = gtk.TextView.new()
+        self.fc_view_loc: gtk.TextView = gtk.TextView.new()
+        self.fc_view_summary: gtk.TextView = gtk.TextView.new()
+        self.fc_view_prob_rain: gtk.TextView = gtk.TextView.new()
+        self.fc_view_temp: gtk.TextView = gtk.TextView.new()
+        self.fc_view_humid: gtk.TextView = gtk.TextView.new()
+        self.fc_view_wind: gtk.TextView = gtk.TextView.new()
+
+        fc_views: tuple[gtk.Widget] = (
+            self.fc_view_time,
+            self.fc_view_loc,
+            self.fc_view_summary,
+            self.fc_view_prob_rain,
+            self.fc_view_temp,
+            self.fc_view_humid,
+            self.fc_view_wind,
+        )
+
+        for v in fc_views:
+            v.editable = False
+
         self.warn_view = gtk.TreeView(model=self.store)
 
         for c in columns:  # pylint: disable-msg=C0103
@@ -174,8 +206,27 @@ class WetterGUI:
         # Assemble window and widgets ##################################
         ################################################################
 
+        self.fc_grid.attach(self.fc_lbl_time, 0, 0, 1, 1)
+        self.fc_grid.attach(self.fc_view_time, 1, 0, 1, 1)
+        self.fc_grid_attach(self.fc_lbl_loc, 2, 0, 1, 1)
+        self.fc_grid.attach(self.fc_view_loc, 3, 0, 1, 1)
+        self.fc_grid_attach(self.fc_lbl_summary, 4, 0, 1, 1)
+        self.fc_grid.attach(self.fc_view_summary, 5, 0, 1, 1)
+        self.fc_grid.attach(self.fc_lbl_temp, 0, 1, 1, 1)
+        self.fc_grid.attach(self.fc_view_temp, 1, 1, 1, 1)
+        self.fc_grid.attach(self.fc_lbl_humid, 2, 1, 1, 1)
+        self.fc_grid.attach(self.fc_view_humid, 3, 1, 1, 1)
+        self.fc_grid.attach(self.fc_lbl_wind, 4, 1, 1, 1)
+        self.fc_grid.attach(self.fc_view_wind, 5, 1, 1, 1)
+        self.fc_grid.attach(self.fc_lbl_prob_rain, 6, 1, 1, 1)
+        self.fc_grid.attach(self.fc_view_prob_rain, 7, 1, 1, 1)
+
         self.win.add(self.mbox)  # pylint: disable-msg=E1101
         self.mbox.pack_start(self.menubar,  # pylint: disable-msg=E1101
+                             False,
+                             True,
+                             0)
+        self.mbox.pack_start(self.fc_grid,
                              False,
                              True,
                              0)
@@ -242,6 +293,33 @@ class WetterGUI:
             self.local.db = db
             return db
 
+    def get_location(self) -> str:
+        """Try to determine our location (city) using ipinfo.io"""
+        try:
+            res = requests.get(IPINFO_URL, verify=True, timeout=5)
+            if res.status_code != 200:
+                return ""
+            data = res.json()
+            self.coords = [float(x) for x in data["loc"].split(",")]
+            self.here = data["city"]
+            return data["city"]
+        except Exception as e:  # pylint: disable-msg=W0718,C0103
+            self.log.error("Failed to get location: %s", e)
+            return ""
+
+    def update_forecast(self) -> bool:
+        """Refresh the weather forecast"""
+        agent = self.get_client()
+        fc = agent.fetch_weather()
+        if fc is not None:
+            pass
+            self.fc_view_time.get_buffer().set_text(
+                fc.timestamp.strftime(common.TIME_FMT))
+            self.fc_view_loc.get_buffer().set_text(
+                f"{fc.location[0]}/{fc.location[1]}")
+            self.fc_view_summary.get_buffer().set_text(fc.summary)
+            self.fc_view_temp.get_buffer().set_text(f"{fc.temperature} °C")
+
     def __toggle_visible(self, *_ignore: Any) -> None:
         if self.visible:
             self.win.hide()
@@ -277,19 +355,6 @@ class WetterGUI:
         menu.append(quit_item)
         menu.show_all()
         menu.popup_at_pointer(event)
-
-    def get_location(self) -> str:
-        """Try to determine our location (city) using ipinfo.io"""
-        try:
-            res = requests.get(IPINFO_URL, verify=True, timeout=5)
-            if res.status_code != 200:
-                return ""
-            data = res.json()
-            self.coords = [float(x) for x in data["loc"].split(",")]
-            return data["city"]
-        except Exception as e:  # pylint: disable-msg=W0718,C0103
-            self.log.error("Failed to get location: %s", e)
-            return ""
 
     def display_msg(self, msg: str) -> None:
         """Display a message in a dialog."""
@@ -358,8 +423,6 @@ class WetterGUI:
 
         if has_warnings:
             self.tray.set_from_icon_name(ICON_NAME_WARN)
-        else:
-            self.tray.set_from_icon_name(ICON_NAME_DEFAULT)
 
     def __refresh_worker(self) -> None:
         """Periodically fetch data from the DWD and process it."""

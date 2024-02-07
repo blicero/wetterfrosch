@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-04 22:48:28 krylon>
+# Time-stamp: <2024-02-06 20:05:38 krylon>
 #
 # /data/code/python/wetterfrosch/dwd.py
 # created on 28. 12. 2023
@@ -30,6 +30,7 @@ from warnings import warn
 import requests  # type: ignore
 
 from wetterfrosch import common, data, database
+from wetterfrosch.data import Forecast
 
 WARNINGS_URL: Final[str] = \
     "https://www.dwd.de/DWD/warnungen/warnapp/json/warnings.json"
@@ -149,7 +150,7 @@ class Client:
     db: database.Database
     cache: Optional[list[data.WeatherWarning]]
     known: set[str]
-    fcache: Optional[dict[str, Any]]
+    fcache: Optional[Forecast]
 
     _loc: list[str] = []
 
@@ -172,7 +173,7 @@ class Client:
     def fetch(self, attempt: int = 5) -> Optional[list[data.WeatherWarning]]:
         """Fetch the current list of warnings from DWD."""
         next_fetch = self.last_wfetch + self.winterval
-        if next_fetch > datetime.now():
+        if next_fetch > datetime.now() and self.fcache is not None:
             self.log.info("Last fetch was %s, next fetch is not due until %s",
                           self.last_wfetch.strftime(common.TIME_FMT),
                           next_fetch.strftime(common.TIME_FMT))
@@ -231,7 +232,7 @@ class Client:
         for pat in locations:
             self.loc_patterns.add(pat)
 
-    def fetch_weather(self) -> Optional[dict[str, Any]]:
+    def fetch_weather(self) -> Optional[Forecast]:
         """Fetch weather data from Pirate Weather"""
         next_fetch: Final[datetime] = self.last_ffetch + self.finterval
         if next_fetch > datetime.now():
@@ -251,8 +252,11 @@ class Client:
             body: Final[str] = res.content.decode()
             records: dict[str, Any] = json.loads(body)
             self.last_ffetch = datetime.now()
-            self.fcache = records
-            return records
+            fc: Forecast = Forecast(records)
+            self.fcache = fc
+            with self.db:
+                self.db.forecast_add(fc)
+            return fc
         except Exception as e:  # pylint: disable-msg=W0718
             self.log.error("Failed to fetch weather forecast: %s",
                            pprint.pformat(e.args))
