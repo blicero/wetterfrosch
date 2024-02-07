@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-06 18:02:25 krylon>
+# Time-stamp: <2024-02-07 15:50:37 krylon>
 #
 # /data/code/python/wetterfrosch/data.py
 # created on 12. 01. 2024
@@ -175,7 +175,7 @@ class Forecast:
         fc = cls.__new__(cls)
         fc.fid = row[0]
         fc.timestamp = datetime.fromtimestamp(row[1])
-        fc.location = tuple(loc)
+        fc.location = (loc[0], loc[1])
         fc.summary = row[3]
         fc.icon = row[4]
         fc.probability_rain = row[5]
@@ -199,6 +199,8 @@ class Forecast:
         return humid
 
     def icon_name(self) -> str:
+        """Attempt to guess the name of the appropriate icon to display for
+        the weather forecast."""
         return f"weather-{self.icon}-symbolic"
 
 # local Variables: #
