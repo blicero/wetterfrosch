@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-06 20:07:43 krylon>
+# Time-stamp: <2024-02-07 16:23:12 krylon>
 #
 # /data/code/python/wetterfrosch/database.py
 # created on 13. 01. 2024
@@ -400,9 +400,7 @@ class Database:
         l: int = len(results)
         if l != cnt:
             diff: int = cnt - l
-            self.log.debug("Found %d duplicate warnings in database.", diff)
-        # assert (cnt == len(results)), \
-        #     f"Expected {cnt} warnings, only have {len(results)}"
+            self.log.warn("Found %d duplicate warnings in database.", diff)
         return results
 
     def warning_has_key(self, key: str) -> bool:
