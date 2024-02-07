@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-07 17:49:36 krylon>
+# Time-stamp: <2024-02-07 18:54:03 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -287,8 +287,8 @@ class WetterGUI:
         self.win.show_all()  # pylint: disable-msg=E1101
         self.visible = True
         # glib.timeout_add(2000, self.__check_queue)
-        glib.timeout_add(10000, self.__get_warnings)
-        glib.timeout_add(2500, self.update_forecast)
+        glib.timeout_add(10_000, self.__get_warnings)
+        glib.timeout_add(30_000, self.update_forecast)
 
     def get_client(self) -> client.Client:
         """Get the Client instance for the calling thread."""
@@ -329,7 +329,7 @@ class WetterGUI:
             fc = agent.fetch_weather()
             if fc is not None:
                 if fc.timestamp == self.fc_stamp:
-                    self.log.debug("Weather forecast is already current.")
+                    # self.log.debug("Weather forecast is already current.")
                     return True
                 self.fc_stamp = fc.timestamp
                 self.fc_view_time.get_buffer().set_text(
