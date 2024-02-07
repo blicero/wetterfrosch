@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-02-07 13:46:30 krylon>
+# Time-stamp: <2024-02-07 16:36:24 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -13,14 +13,14 @@
   German Weather Service (Deutscher Wetterdienst, [[https://www.dwd.de/][DWD]]) and display them.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2024-02-06 Di 22:37]
+   #+CAPTION: Clock summary at [2024-02-07 Mi 16:36]
    | Headline                            | Time       |            |          |       |      |
    |-------------------------------------+------------+------------+----------+-------+------|
-   | *Total time*                        | *3d 15:20* |            |          |       |      |
+   | *Total time*                        | *3d 16:38* |            |          |       |      |
    |-------------------------------------+------------+------------+----------+-------+------|
-   | *Wetterfrosch*                      | *3d 15:20* |            |          |       |      |
-   | \_  /Features [0/1]/                |            | /1d 11:17/ |          |       |      |
-   | \_    More data [0/0]               |            |            | 1d 11:17 |       |      |
+   | *Wetterfrosch*                      | *3d 16:38* |            |          |       |      |
+   | \_  /Features [0/1]/                |            | /1d 12:35/ |          |       |      |
+   | \_    More data [0/0]               |            |            | 1d 12:35 |       |      |
    | \_  /Components [11/14]/            |            | /1d 23:42/ |          |       |      |
    | \_    Configuration [0/0]           |            |            |     2:00 |       |      |
    | \_    Database [1/1]                |            |            |    18:14 |       |      |
@@ -48,6 +48,7 @@
     :VISIBILITY: children
     :END:
     :LOGBOOK:
+    CLOCK: [2024-02-07 Mi 15:39]--[2024-02-07 Mi 16:33] =>  0:54
     CLOCK: [2024-02-07 Mi 13:22]--[2024-02-07 Mi 13:46] =>  0:24
     CLOCK: [2024-02-06 Di 18:36]--[2024-02-06 Di 22:37] =>  4:01
     CLOCK: [2024-02-06 Di 14:46]--[2024-02-06 Di 15:23] =>  0:37
