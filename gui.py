@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-06 21:43:26 krylon>
+# Time-stamp: <2024-02-07 16:15:32 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -73,6 +73,7 @@ class WetterGUI:
         self.coords: list[float] = [0, 0]
         self.here: str = ""
         self.here_stamp: datetime = datetime.fromtimestamp(0)
+        self.fc_stamp: datetime = datetime.fromtimestamp(0)
 
         self.location: list[str] = []
         loc: str = self.get_location()
@@ -176,7 +177,20 @@ class WetterGUI:
         self.fc_view_humid: gtk.TextView = gtk.TextView.new()
         self.fc_view_wind: gtk.TextView = gtk.TextView.new()
 
-        fc_views: tuple[gtk.Widget] = (
+        fc_labels: tuple[gtk.Label, ...] = (
+            self.fc_lbl_time,
+            self.fc_lbl_loc,
+            self.fc_lbl_summary,
+            self.fc_lbl_prob_rain,
+            self.fc_lbl_temp,
+            self.fc_lbl_humid,
+            self.fc_lbl_wind,
+        )
+
+        for lbl in fc_labels:
+            lbl.set_xalign(1.0)
+
+        fc_views: tuple[gtk.Widget, ...] = (
             self.fc_view_time,
             self.fc_view_loc,
             self.fc_view_summary,
@@ -208,9 +222,9 @@ class WetterGUI:
 
         self.fc_grid.attach(self.fc_lbl_time, 0, 0, 1, 1)
         self.fc_grid.attach(self.fc_view_time, 1, 0, 1, 1)
-        self.fc_grid_attach(self.fc_lbl_loc, 2, 0, 1, 1)
+        self.fc_grid.attach(self.fc_lbl_loc, 2, 0, 1, 1)
         self.fc_grid.attach(self.fc_view_loc, 3, 0, 1, 1)
-        self.fc_grid_attach(self.fc_lbl_summary, 4, 0, 1, 1)
+        self.fc_grid.attach(self.fc_lbl_summary, 4, 0, 1, 1)
         self.fc_grid.attach(self.fc_view_summary, 5, 0, 1, 1)
         self.fc_grid.attach(self.fc_lbl_temp, 0, 1, 1, 1)
         self.fc_grid.attach(self.fc_view_temp, 1, 1, 1, 1)
@@ -274,6 +288,7 @@ class WetterGUI:
         self.visible = True
         # glib.timeout_add(2000, self.__check_queue)
         glib.timeout_add(10000, self.__get_warnings)
+        glib.timeout_add(2500, self.update_forecast)
 
     def get_client(self) -> client.Client:
         """Get the Client instance for the calling thread."""
@@ -309,16 +324,28 @@ class WetterGUI:
 
     def update_forecast(self) -> bool:
         """Refresh the weather forecast"""
-        agent = self.get_client()
-        fc = agent.fetch_weather()
-        if fc is not None:
-            pass
-            self.fc_view_time.get_buffer().set_text(
-                fc.timestamp.strftime(common.TIME_FMT))
-            self.fc_view_loc.get_buffer().set_text(
-                f"{fc.location[0]}/{fc.location[1]}")
-            self.fc_view_summary.get_buffer().set_text(fc.summary)
-            self.fc_view_temp.get_buffer().set_text(f"{fc.temperature} °C")
+        try:
+            agent = self.get_client()
+            fc = agent.fetch_weather()
+            if fc is not None:
+                if fc.timestamp == self.fc_stamp:
+                    self.log.debug("Weather forecast is already current.")
+                    return True
+                self.fc_stamp = fc.timestamp
+                self.fc_view_time.get_buffer().set_text(
+                    fc.timestamp.strftime(common.TIME_FMT))
+                self.fc_view_loc.get_buffer().set_text(
+                    f"{fc.location[0]}/{fc.location[1]}")
+                self.fc_view_summary.get_buffer().set_text(fc.summary)
+                self.fc_view_temp.get_buffer().set_text(f"{fc.temperature} °C")
+                self.fc_view_humid.get_buffer().set_text(f"{fc.humidity} %")
+                self.fc_view_wind.get_buffer().set_text(f"{fc.wind_speed} km/h")
+                self.fc_view_prob_rain.get_buffer().set_text(f"{fc.probability_rain} %")
+            else:
+                self.log.error("Client did not return forecast data")
+        except Exception as e:  # pylint: disable-msg=W0718
+            self.log.error("Error refreshing forecast: %s", e)
+        return True
 
     def __toggle_visible(self, *_ignore: Any) -> None:
         if self.visible:
@@ -565,7 +592,6 @@ class WetterGUI:
                               "w",
                               encoding="utf-8") as fh:
                         fh.write(newlist)
-                    # self.client.update_locations(patterns)
                     loc_list = client.LocationList.new()
                     loc_list.replace(patterns)
         finally:
