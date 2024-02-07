@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-06 20:05:38 krylon>
+# Time-stamp: <2024-02-07 16:15:42 krylon>
 #
 # /data/code/python/wetterfrosch/dwd.py
 # created on 28. 12. 2023
@@ -225,13 +225,6 @@ class Client:
                            pprint.pformat(e.args))
             return None
 
-    def update_locations(self, locations: list[str]) -> None:
-        """Replace the list of locations with the given list."""
-        # self.loc_patterns.replace(locations)
-        self.loc_patterns.clear()
-        for pat in locations:
-            self.loc_patterns.add(pat)
-
     def fetch_weather(self) -> Optional[Forecast]:
         """Fetch weather data from Pirate Weather"""
         next_fetch: Final[datetime] = self.last_ffetch + self.finterval
@@ -261,17 +254,6 @@ class Client:
             self.log.error("Failed to fetch weather forecast: %s",
                            pprint.pformat(e.args))
             return None
-
-    # def process(self, items: dict) -> Optional[list[data.WeatherWarning]]:
-    #     """Process the data we received from the DWD web site."""
-    #     warnings: list[data.WeatherWarning] = []
-    #     for w in items["warnings"].values():  # pylint: disable-msg=C0103
-    #         for event in w:
-    #             if self.loc_patterns.check(event["regionName"]):
-    #                 warning = data.WeatherWarning(event)
-    #                 warnings.append(warning)
-    #                 break
-    #     return warnings
 
 
 # Local Variables: #
