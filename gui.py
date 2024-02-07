@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-07 16:15:32 krylon>
+# Time-stamp: <2024-02-07 17:49:36 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -240,7 +240,7 @@ class WetterGUI:
                              False,
                              True,
                              0)
-        self.mbox.pack_start(self.fc_grid,
+        self.mbox.pack_start(self.fc_grid,  # pylint: disable-msg=E1101
                              False,
                              True,
                              0)
@@ -339,8 +339,10 @@ class WetterGUI:
                 self.fc_view_summary.get_buffer().set_text(fc.summary)
                 self.fc_view_temp.get_buffer().set_text(f"{fc.temperature} °C")
                 self.fc_view_humid.get_buffer().set_text(f"{fc.humidity} %")
-                self.fc_view_wind.get_buffer().set_text(f"{fc.wind_speed} km/h")
-                self.fc_view_prob_rain.get_buffer().set_text(f"{fc.probability_rain} %")
+                self.fc_view_wind.get_buffer().set_text(
+                    f"{fc.wind_speed} km/h")
+                self.fc_view_prob_rain.get_buffer().set_text(
+                    f"{fc.probability_rain} %")
             else:
                 self.log.error("Client did not return forecast data")
         except Exception as e:  # pylint: disable-msg=W0718
