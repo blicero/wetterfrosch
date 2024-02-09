@@ -1,4 +1,4 @@
--- Time-stamp: <2024-02-07 19:02:36 krylon>
+-- Time-stamp: <2024-02-09 17:37:17 krylon>
 
 WITH ranked AS (
 	SELECT
@@ -10,7 +10,7 @@ WITH ranked AS (
 )
 
 SELECT * FROM ranked
-WHERE num > 0;
+WHERE num > 1;
 -- DELETE FROM warning WHERE id IN (SELECT id FROM ranked WHERE num > 1);
 
 -- COMMIT;
