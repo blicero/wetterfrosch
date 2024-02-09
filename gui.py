@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-07 18:54:03 krylon>
+# Time-stamp: <2024-02-09 22:08:50 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -20,10 +20,9 @@ wetterfrosch.gui
 import json
 import os
 import re
-import time
 import traceback
 from datetime import datetime, timedelta
-from threading import Lock, Thread, local
+from threading import Lock, local
 from typing import Any, Final, Optional
 
 import gi  # type: ignore
@@ -74,8 +73,8 @@ class WetterGUI:
         self.here: str = ""
         self.here_stamp: datetime = datetime.fromtimestamp(0)
         self.fc_stamp: datetime = datetime.fromtimestamp(0)
-
         self.location: list[str] = []
+
         loc: str = self.get_location()
         if loc != "":
             self.location.append(loc)
@@ -90,13 +89,11 @@ class WetterGUI:
                 for line in fh:
                     self.location.append(line.strip())
 
+        self.client = client.Client(30, self.location)
+        self.client.start()
+
         db = self.get_database()
         self.alert_cache = db.warning_get_keys()
-
-        self.refresh_worker = Thread(
-            target=self.__refresh_worker,
-            daemon=True)
-        self.refresh_worker.start()
 
         ################################################################
         # Create window and widgets ####################################
@@ -290,15 +287,6 @@ class WetterGUI:
         glib.timeout_add(10_000, self.__get_warnings)
         glib.timeout_add(30_000, self.update_forecast)
 
-    def get_client(self) -> client.Client:
-        """Get the Client instance for the calling thread."""
-        try:
-            return self.local.client
-        except AttributeError:
-            c = client.Client(60, self.location)  # # pylint: disable-msg=C0103
-            self.local.client = c
-            return c
-
     def get_database(self) -> database.Database:
         """Get the Database instance for the calling thread."""
         try:
@@ -325,8 +313,8 @@ class WetterGUI:
     def update_forecast(self) -> bool:
         """Refresh the weather forecast"""
         try:
-            agent = self.get_client()
-            fc = agent.fetch_weather()
+            db = self.get_database()
+            fc = db.forecast_get_current()
             if fc is not None:
                 if fc.timestamp == self.fc_stamp:
                     # self.log.debug("Weather forecast is already current.")
@@ -453,22 +441,6 @@ class WetterGUI:
         if has_warnings:
             self.tray.set_from_icon_name(ICON_NAME_WARN)
 
-    def __refresh_worker(self) -> None:
-        """Periodically fetch data from the DWD and process it."""
-        while self.is_active():
-            try:
-                dwd: client.Client = self.get_client()
-                dwd.fetch()
-            except Exception as e:  # pylint: disable-msg=W0718
-                self.log.error(
-                    "Something went wrong refreshing our data: %s",
-                    e)
-            finally:
-                self.log.debug(
-                    "Refresh worker is going to sleep for %f seconds.",
-                    FETCH_INTERVAL)
-                time.sleep(FETCH_INTERVAL)
-
     def __get_warnings(self) -> bool:
         try:
             d1 = datetime.now() - timedelta(hours=2)
@@ -492,9 +464,8 @@ class WetterGUI:
 
     def load(self, *_ignore: Any) -> bool:
         """Fetch data, process, display"""
-        c = self.get_client()
         try:
-            raw = c.fetch()
+            raw = self.client.fetch()
             if raw is None:
                 self.display_msg("Client did not return any data.")
                 return True

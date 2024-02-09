@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # pylint: disable-msg=C0302
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-06 15:00:20 krylon>
+# Time-stamp: <2024-02-08 19:24:55 krylon>
 #
 # /data/code/python/wetterfrosch/test_database.py
 # created on 13. 01. 2024
@@ -77,14 +77,17 @@ class DatabaseTest(unittest.TestCase):
         """Test adding warnings to the database."""
         db = self.__get_db()
         raw = json.loads(TEST_DATA)
+        seen: set[str] = set()
         cnt: int = 0
         try:
             with db:
                 for group in raw.values():
                     for item in group:
                         w = WeatherWarning(item)
-                        db.warning_add(w)
-                        cnt += 1
+                        if w.cksum() not in seen:
+                            db.warning_add(w)
+                            seen.add(w.cksum())
+                            cnt += 1
 
             with db:
                 items = db.warning_get_all()

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-07 17:49:13 krylon>
+# Time-stamp: <2024-02-08 18:08:21 krylon>
 #
 # /data/code/python/wetterfrosch/database.py
 # created on 13. 01. 2024
@@ -64,7 +64,8 @@ INIT_QUERIES: Final[list[str]] = [
                                 level
                         ) VIRTUAL,
         CHECK           (start <= end),
-        CHECK           (altitude_start <= altitude_end)
+        CHECK           (altitude_start <= altitude_end),
+        UNIQUE (start, end, region_name, event, description, level)
     ) STRICT
     """,
     "CREATE INDEX wrn_reg_idx ON warning (region_name)",
