@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-02-07 16:36:24 krylon>
+# Time-stamp: <2024-02-09 22:12:52 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -13,36 +13,38 @@
   German Weather Service (Deutscher Wetterdienst, [[https://www.dwd.de/][DWD]]) and display them.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2024-02-07 Mi 16:36]
-   | Headline                            | Time       |            |          |       |      |
-   |-------------------------------------+------------+------------+----------+-------+------|
-   | *Total time*                        | *3d 16:38* |            |          |       |      |
-   |-------------------------------------+------------+------------+----------+-------+------|
-   | *Wetterfrosch*                      | *3d 16:38* |            |          |       |      |
-   | \_  /Features [0/1]/                |            | /1d 12:35/ |          |       |      |
-   | \_    More data [0/0]               |            |            | 1d 12:35 |       |      |
-   | \_  /Components [11/14]/            |            | /1d 23:42/ |          |       |      |
-   | \_    Configuration [0/0]           |            |            |     2:00 |       |      |
-   | \_    Database [1/1]                |            |            |    18:14 |       |      |
-   | \_      Replace queue with database |            |            |          |  5:11 |      |
-   | \_    Load warnings from DWD [3/4]  |            |            |     4:44 |       |      |
-   | \_      Use requests library        |            |            |          |  0:23 |      |
-   | \_      Location                    |            |            |          |  1:33 |      |
-   | \_      Testing                     |            |            |          |  0:41 |      |
-   | \_    GUI [4/5]                     |            |            |    22:44 |       |      |
-   | \_      Location management [1/1]   |            |            |          | 13:29 |      |
-   | \_        Separate window class     |            |            |          |       | 0:01 |
-   | \_      Non-blocking refresh        |            |            |          |  3:26 |      |
-   | \_      Tray Icon                   |            |            |          |  1:14 |      |
-   | \_  /Bugs [1/1]/                    |            | /4:21/     |          |       |      |
-   | \_    Crash nach Dialog             |            |            |     4:21 |       |      |
+   #+CAPTION: Clock summary at [2024-02-09 Fr 22:12]
+   | Headline                            | Time      |            |          |       |      |
+   |-------------------------------------+-----------+------------+----------+-------+------|
+   | *Total time*                        | *4d 2:13* |            |          |       |      |
+   |-------------------------------------+-----------+------------+----------+-------+------|
+   | *Wetterfrosch*                      | *4d 2:13* |            |          |       |      |
+   | \_  /Features [1/1]/                |           | /1d 12:35/ |          |       |      |
+   | \_    More data [0/0]               |           |            | 1d 12:35 |       |      |
+   | \_  /Components [11/14]/            |           | /2d 9:17/  |          |       |      |
+   | \_    Configuration [0/0]           |           |            |     2:00 |       |      |
+   | \_    Database [1/1]                |           |            |    18:14 |       |      |
+   | \_      Replace queue with database |           |            |          |  5:11 |      |
+   | \_    Load warnings from DWD [4/5]  |           |            |    14:19 |       |      |
+   | \_      Avoid duplicates            |           |            |          |  9:35 |      |
+   | \_      Use requests library        |           |            |          |  0:23 |      |
+   | \_      Location                    |           |            |          |  1:33 |      |
+   | \_      Testing                     |           |            |          |  0:41 |      |
+   | \_    GUI [4/5]                     |           |            |    22:44 |       |      |
+   | \_      Location management [1/1]   |           |            |          | 13:29 |      |
+   | \_        Separate window class     |           |            |          |       | 0:01 |
+   | \_      Non-blocking refresh        |           |            |          |  3:26 |      |
+   | \_      Tray Icon                   |           |            |          |  1:14 |      |
+   | \_  /Bugs [1/1]/                    |           | /4:21/     |          |       |      |
+   | \_    Crash nach Dialog             |           |            |     4:21 |       |      |
    #+END:
-** Features [0/1]
+** Features [1/1]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
    :END:
-*** TODO More data [0/0]
+*** DONE More data [0/0]
+    CLOSED: [2024-02-07 Mi 19:04]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
     :VISIBILITY: children
@@ -117,7 +119,7 @@
      client to the GUI with the database itself. The client simply stores its
      data there, the GUI queries the database for current warnings. Much
      cleaner and less error-prone.
-*** DONE Load warnings from DWD [3/4]
+*** DONE Load warnings from DWD [4/5]
     CLOSED: [2024-01-10 Mi 18:53]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
@@ -126,7 +128,15 @@
     :LOGBOOK:
     CLOCK: [2023-12-30 Sa 16:27]--[2023-12-30 Sa 18:34] =>  2:07
     :END:
-**** TODO Cache data
+**** TODO Avoid duplicates
+     :LOGBOOK:
+     CLOCK: [2024-02-09 Fr 17:36]--[2024-02-09 Fr 22:12] =>  4:36
+     CLOCK: [2024-02-08 Do 19:22]--[2024-02-08 Do 20:48] =>  1:26
+     CLOCK: [2024-02-08 Do 16:45]--[2024-02-08 Do 18:09] =>  1:24
+     CLOCK: [2024-02-07 Mi 19:06]--[2024-02-07 Mi 21:15] =>  2:09
+     :END:
+**** DONE Cache data
+     CLOSED: [2024-02-07 Mi 19:05]
      I would like to cache the data I fetch, so if fetch() is called again
      before the the next fetch is due, I can return the most recent data.
      I would also like to persistently save that data and the time I last
