@@ -1,5 +1,5 @@
 [tool.pylint.main]
-# Time-stamp: <2024-01-31 20:08:34 krylon>
+# Time-stamp: <2024-02-09 19:15:33 krylon>
 # Analyse import fallback blocks. This can be used to support both Python 2 and 3
 # compatible code, which means that the block might have code that exists only in
 # one or another interpreter, leading to false positives when analysed.
@@ -163,7 +163,7 @@ function-naming-style = "snake_case"
 # function-rgx =
 
 # Good variable names which should always be accepted, separated by a comma.
-good-names = ["i", "j", "k", "ex", "Run", "_"]
+good-names = ["i", "j", "k", "ex", "Run", "_", "e", "x", "y", "a", "b"]
 
 # Good variable names regexes, separated by a comma. If names match any regex,
 # they will always be accepted
@@ -378,7 +378,8 @@ disable = [
         # "use-implicit-booleaness-not-comparison-to-string",
         "use-symbolic-message-instead",
         "C0302",
-        "C0103"]
+        "C0103",
+        "R0801"]
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
