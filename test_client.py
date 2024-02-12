@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-03 17:53:55 krylon>
+# Time-stamp: <2024-02-12 18:14:42 krylon>
 #
 # /data/code/python/wetterfrosch/test_client.py
 # created on 02. 01. 2024
@@ -72,7 +72,7 @@ class ClientTest(unittest.TestCase):
         self.assertIsNotNone(c)
         try:
             assert c is not None
-            data: Optional[list[WeatherWarning]] = c.fetch()
+            data: Optional[list[WeatherWarning]] = c.fetch_warnings()
             if data is not None:
                 self.assertIsNotNone(data)
                 assert data is not None

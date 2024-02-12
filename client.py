@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-09 22:09:44 krylon>
+# Time-stamp: <2024-02-12 18:25:29 krylon>
 #
 # /data/code/python/wetterfrosch/dwd.py
 # created on 28. 12. 2023
@@ -229,7 +229,7 @@ class Client:
         """Regularly fetch warnings from the DWD"""
         while self.is_active():
             try:
-                self.fetch()
+                self.fetch_warnings()
             except:  # noqa: E722,B001  pylint: disable-msg=W0702
                 self.log.error(
                     "Failed to load warnings: %s",
@@ -240,7 +240,7 @@ class Client:
     def _forecast_refresh_worker(self) -> None:
         while self.is_active():
             try:
-                self.fetch_weather()
+                self.fetch_forecast()
             except:  # noqa: E722,B001  pylint: disable-msg=W0702
                 self.log.error("Failed to load forecast data: %s",
                                sys.exception())
@@ -248,7 +248,7 @@ class Client:
                 time.sleep(self.finterval.seconds)
 
     # pylint: disable-msg=R0911
-    def fetch(self, attempt: int = 5) -> Optional[list[data.WeatherWarning]]:
+    def fetch_warnings(self, attempt: int = 5) -> Optional[list[data.WeatherWarning]]:  # noqa: E501
         """Fetch the current list of warnings from DWD."""
         next_fetch = self.last_wfetch + self.winterval
         if next_fetch > datetime.now() and self.fcache is not None:
@@ -265,7 +265,7 @@ class Client:
                 case 403:
                     if attempt > 0:
                         time.sleep(1)
-                        return self.fetch(attempt - 1)
+                        return self.fetch_warnings(attempt - 1)
                     return None
                 case _:
                     self.log.error("Failed to fetch warnings: %d",
@@ -304,7 +304,7 @@ class Client:
                            pprint.pformat(e.args))
             return None
 
-    def fetch_weather(self) -> Optional[Forecast]:
+    def fetch_forecast(self) -> Optional[Forecast]:
         """Fetch weather data from Pirate Weather"""
         next_fetch: Final[datetime] = self.last_ffetch + self.finterval
         if next_fetch > datetime.now():
