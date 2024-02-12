@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-08 18:08:21 krylon>
+# Time-stamp: <2024-02-12 18:42:11 krylon>
 #
 # /data/code/python/wetterfrosch/database.py
 # created on 13. 01. 2024
@@ -104,6 +104,7 @@ class Query(Enum):
     WarningGetAll = auto()
     WarningGetKeys = auto()
     WarningHasKey = auto()
+    WarningExists = auto()
     WarningAcknowledge = auto()
     ForecastAdd = auto()
     ForecastGetCurrent = auto()
@@ -182,6 +183,17 @@ SELECT
     COUNT(id) AS cnt
  FROM warning
  WHERE key = ?
+    """,
+    Query.WarningExists: """
+ SELECT
+    COUNT(id) AS cnt
+ FROM warning
+ WHERE start = ?
+    AND end = ?
+    AND region_name = ?
+    AND event = ?
+    AND description = ?
+    AND level = ?
     """,
     Query.WarningAcknowledge: """
 UPDATE warning
@@ -410,6 +422,19 @@ class Database:
         cur.execute(db_queries[Query.WarningHasKey], (key, ))
         row = cur.fetchone()
         return row[0] > 0
+
+    def warning_exist(self, w: WeatherWarning) -> bool:
+        """Return True if an identical warning already exists."""
+        cur: Final[sqlite3.Cursor] = self.db.cursor()
+        cur.execute(db_queries[Query.WarningExists],
+                    (int(w.start.timestamp()),
+                     int(w.end.timestamp()),
+                     w.region_name,
+                     w.event,
+                     w.description,
+                     w.level))
+        row = cur.fetchone()
+        return row[0] != 0
 
     def warning_acknowledge(self, w: WeatherWarning) -> None:
         """Mark a WeatherWarning as acknowledged."""

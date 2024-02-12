@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-12 18:25:29 krylon>
+# Time-stamp: <2024-02-12 18:50:31 krylon>
 #
 # /data/code/python/wetterfrosch/dwd.py
 # created on 28. 12. 2023
@@ -293,7 +293,7 @@ class Client:
                         if self.loc_patterns.check(w.region_name):
                             processed.append(w)
                         if not w.cksum() in self.known:
-                            if not db.warning_has_key(w.cksum()):
+                            if not db.warning_exist(w):
                                 db.warning_add(w)
                             self.known.add(w.cksum())
 
