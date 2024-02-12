@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-09 22:08:50 krylon>
+# Time-stamp: <2024-02-12 18:46:54 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -159,6 +159,10 @@ class WetterGUI:
             gtk.MenuItem.new_with_mnemonic("_Nachricht anzeigen")
 
         self.fc_grid: gtk.Grid = gtk.Grid.new()
+        self.fc_grid.set_column_homogeneous(True)
+        self.fc_grid.set_row_homogeneous(True)
+        self.fc_grid.set_column_spacing(4)
+        self.fc_grid.set_row_spacing(2)
         self.fc_lbl_time: gtk.Label = gtk.Label.new("Zeit")
         self.fc_lbl_loc: gtk.Label = gtk.Label.new("Ort")
         self.fc_lbl_summary: gtk.Label = gtk.Label.new("Wetterlage")
@@ -465,20 +469,16 @@ class WetterGUI:
     def load(self, *_ignore: Any) -> bool:
         """Fetch data, process, display"""
         try:
-            raw = self.client.fetch()
-            if raw is None:
-                self.display_msg("Client did not return any data.")
-                return True
-            proc = raw
-            if proc is None or len(proc) == 0:
-                self.log.debug("No warnings were left after processing.")
-                return True
-            self.display_data(proc)
-            return True
+            now: Final[datetime] = datetime.now()
+            d1: Final[datetime] = now - timedelta(hours=2)
+            d2: Final[datetime] = now + timedelta(hours=12)
+            db = self.get_database()
+            warnings = db.warning_get_by_period(d1, d2)
+            self.display_data(warnings)
         except Exception as e:  # pylint: disable-msg=W0718
             self.log.error("Something went wrong refreshing our data: %s", e)
             traceback.print_exception(e)
-            return True
+        return True
 
     def load_from_file(self, _ignore: Any) -> None:
         """Load warnings from a file, mainly for testing purposes."""
