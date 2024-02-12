@@ -544,7 +544,7 @@ class WetterGUI:
             newlist: Final[str] = buf.get_text(start, end, True)
             if newlist != content:
                 self.log.debug("Location list was modified, checking new list")
-                patterns: Final[list[str]] = newlist.split(NEWLINE)
+                patterns: Final[list[str]] = sorted(set(newlist.split(NEWLINE)))
                 valid: bool = True
                 for p in patterns:
                     try:
