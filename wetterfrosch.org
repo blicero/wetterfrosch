@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-02-12 18:52:48 krylon>
+# Time-stamp: <2024-02-12 19:06:18 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -119,7 +119,7 @@
      client to the GUI with the database itself. The client simply stores its
      data there, the GUI queries the database for current warnings. Much
      cleaner and less error-prone.
-*** DONE Load warnings from DWD [4/5]
+*** DONE Load warnings from DWD [5/5]
     CLOSED: [2024-01-10 Mi 18:53]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
@@ -128,7 +128,8 @@
     :LOGBOOK:
     CLOCK: [2023-12-30 Sa 16:27]--[2023-12-30 Sa 18:34] =>  2:07
     :END:
-**** TODO Avoid duplicates
+**** DONE Avoid duplicates
+     CLOSED: [2024-02-12 Mo 19:02]
      :LOGBOOK:
      CLOCK: [2024-02-12 Mo 18:18]--[2024-02-12 Mo 18:52] =>  0:34
      CLOCK: [2024-02-09 Fr 17:36]--[2024-02-09 Fr 22:12] =>  4:36
@@ -294,4 +295,7 @@
     [2024-01-31 Mi 21:30]
     After testing on several different systems, I think I've run into a bug in
     Gtk3.
+    [2024-02-12 Mo 19:05]
+    PS The bug has not surfaced since the last edit, so I suppose it's
+    gone. Let's hope it stays that way.
 
