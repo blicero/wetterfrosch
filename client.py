@@ -73,15 +73,18 @@ class LocationList:
                     cls._instance.lock = Lock()
                     cls._instance.dupes = set()
                     for i in patterns:
-                        if isinstance(i, str) and i not in cls._instance.dupes:
-                            cls._instance.patterns.append(re.compile(i, re.I))
-                            cls._instance.dupes.add(i)
-                        elif isinstance(i, re.Pattern) and i.pattern not in cls._instance.dupes:
-                            cls._instance.dupes.add(i.pattern)
-                            cls._instance.patterns.append(i)
+                        if isinstance(i, str):
+                            if i not in cls._instance.dupes:
+                                cls._instance.patterns.append(
+                                    re.compile(i, re.I))
+                                cls._instance.dupes.add(i)
+                        elif isinstance(i, re.Pattern):
+                            if i.pattern not in cls._instance.dupes:
+                                cls._instance.dupes.add(i.pattern)
+                                cls._instance.patterns.append(i)
                         else:
                             raise TypeError(
-                                "Patterns must be str or re.Pattern")
+                                f"Patterns must be str or re.Pattern, not {type(i)}")  # noqa: E501
                 except Exception as e:  # pylint: disable-msg=C0103
                     print("Error creating LocationList singleton instance:", e)
                     raise
