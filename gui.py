@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-12 18:46:54 krylon>
+# Time-stamp: <2024-02-12 19:23:46 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -88,6 +88,8 @@ class WetterGUI:
                     as fh:  # pylint: disable-msg=C0103
                 for line in fh:
                     self.location.append(line.strip())
+
+        self.location = sorted(set(self.location))
 
         self.client = client.Client(30, self.location)
         self.client.start()
@@ -287,9 +289,14 @@ class WetterGUI:
 
         self.win.show_all()  # pylint: disable-msg=E1101
         self.visible = True
-        # glib.timeout_add(2000, self.__check_queue)
         glib.timeout_add(10_000, self.__get_warnings)
         glib.timeout_add(30_000, self.update_forecast)
+        glib.timeout_add(500, self._fetch_init_data)
+
+    def _fetch_init_data(self) -> bool:
+        self.__get_warnings()
+        self.update_forecast()
+        return False
 
     def get_database(self) -> database.Database:
         """Get the Database instance for the calling thread."""
