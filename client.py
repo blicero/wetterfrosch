@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-12 18:50:31 krylon>
+# Time-stamp: <2024-02-13 10:26:56 krylon>
 #
 # /data/code/python/wetterfrosch/dwd.py
 # created on 28. 12. 2023
@@ -42,7 +42,7 @@ ENVELOPE_PAT: Final[re.Pattern] = \
 PIRATE_URL: Final[str] = \
     "https://api.pirateweather.net/forecast" + \
     "/bqiCjEJd20p0mCOJhCDC6Cs1AoCHOhzg" + \
-    "/52.0333,8.5333" + \
+    "/52.001259788359754,8.538241122650915" + \
     "?units=si"
 
 
