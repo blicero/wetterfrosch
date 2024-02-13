@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-12 19:23:46 krylon>
+# Time-stamp: <2024-02-13 11:50:18 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -289,8 +289,8 @@ class WetterGUI:
 
         self.win.show_all()  # pylint: disable-msg=E1101
         self.visible = True
-        glib.timeout_add(10_000, self.__get_warnings)
-        glib.timeout_add(30_000, self.update_forecast)
+        glib.timeout_add(5_000, self.__get_warnings)
+        glib.timeout_add(5_000, self.update_forecast)
         glib.timeout_add(500, self._fetch_init_data)
 
     def _fetch_init_data(self) -> bool:
@@ -334,7 +334,7 @@ class WetterGUI:
                 self.fc_view_time.get_buffer().set_text(
                     fc.timestamp.strftime(common.TIME_FMT))
                 self.fc_view_loc.get_buffer().set_text(
-                    f"{fc.location[0]}/{fc.location[1]}")
+                    f"{fc.location[0]:.02f}/{fc.location[1]:.02f}")
                 self.fc_view_summary.get_buffer().set_text(fc.summary)
                 self.fc_view_temp.get_buffer().set_text(f"{fc.temperature} °C")
                 self.fc_view_humid.get_buffer().set_text(f"{fc.humidity} %")
