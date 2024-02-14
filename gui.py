@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-13 11:50:18 krylon>
+# Time-stamp: <2024-02-14 19:46:57 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -18,7 +18,6 @@ wetterfrosch.gui
 """
 
 import json
-import os
 import re
 import traceback
 from datetime import datetime, timedelta
@@ -62,7 +61,7 @@ class WetterGUI:
     """Graphical frontend to the wetterfrosch app"""
 
     # pylint: disable-msg=R0915
-    def __init__(self) -> None:
+    def __init__(self, clnt: Optional[client.Client] = None) -> None:
         self.log = common.get_logger("GUI")
         self.lock: Final[Lock] = Lock()
         self.local = local()
@@ -91,7 +90,10 @@ class WetterGUI:
 
         self.location = sorted(set(self.location))
 
-        self.client = client.Client(30, self.location)
+        if clnt is None:
+            self.client = client.Client(30, self.location)
+        else:
+            self.client = clnt
         self.client.start()
 
         db = self.get_database()
@@ -293,6 +295,10 @@ class WetterGUI:
         glib.timeout_add(5_000, self.update_forecast)
         glib.timeout_add(500, self._fetch_init_data)
 
+    def run(self) -> None:
+        """Run the Gtk mainloop"""
+        gtk.main()
+
     def _fetch_init_data(self) -> bool:
         self.__get_warnings()
         self.update_forecast()
@@ -423,11 +429,16 @@ class WetterGUI:
 
             if d1 <= now <= d2 or now <= d1 <= delta_d:
                 if not self.__known_alert(event):
-                    n = notify2.Notification(  # pylint: disable-msg=C0103
-                        event.headline,
-                        event.description,
-                        ICON_NAME_WARN)
-                    n.show()
+                    try:
+                        n = notify2.Notification(  # pylint: disable-msg=C0103
+                            event.headline,
+                            event.description,
+                            ICON_NAME_WARN)
+                        n.show()
+                    except Exception as e:  # pylint: disable-msg=W0718
+                        self.log.error("Failed to display notification: %s - %s",  # noqa: E501
+                                       type(e),
+                                       e)
                     has_warnings = True
                     with self.lock:
                         self.alert_cache.add(event.cksum())
@@ -584,20 +595,6 @@ class WetterGUI:
         finally:
             self.log.debug("We displayed a message")
 
-
-def main() -> None:
-    """Create a WetterGUI instance and start the Gtk main loop."""
-    ui = WetterGUI()
-    ui.log.debug("Let's go")
-    gtk.main()
-
-
-if __name__ == '__main__':
-    display: Optional[str] = os.getenv("DISPLAY")
-    if display is None or display == "":
-        print("Environment variable DISPLAY not set, using ':0.0' as default")
-        os.environ["DISPLAY"] = ":0.0"
-    main()
 
 # Local Variables: #
 # python-indent: 4 #

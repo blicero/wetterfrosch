@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-13 10:26:56 krylon>
+# Time-stamp: <2024-02-14 19:38:50 krylon>
 #
 # /data/code/python/wetterfrosch/dwd.py
 # created on 28. 12. 2023
@@ -212,6 +212,9 @@ class Client:
     def start(self) -> None:
         """Start the worker threads to fetch weather forecasts and warnings."""
         with self.lock:
+            if self.active:
+                self.log.info("Client is already running, we're good.")
+                return
             self.active = True
             warn_worker = Thread(
                 target=self._warning_refresh_worker,
