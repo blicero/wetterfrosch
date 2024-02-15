@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-14 19:46:27 krylon>
+# Time-stamp: <2024-02-15 16:39:16 krylon>
 #
 # /data/code/python/wetterfrosch/wetterfrosch.py
 # created on 14. 02. 2024
@@ -64,6 +64,9 @@ def main() -> None:
         while True:
             time.sleep(10)
 
+
+if __name__ == '__main__':
+    main()
 
 # Local Variables: #
 # python-indent: 4 #
