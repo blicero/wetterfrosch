@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-07 15:50:37 krylon>
+# Time-stamp: <2024-02-16 20:53:31 krylon>
 #
 # /data/code/python/wetterfrosch/data.py
 # created on 12. 01. 2024
@@ -19,6 +19,47 @@ wetterfrosch.data
 # import hashlib
 from datetime import datetime, timedelta
 from typing import Any, Final, Optional
+
+
+# Freitag, 16. 02. 2024, 20:15
+# According to Wikipedia, the typical person from central Europe (where I was
+# born and live to this day) perceives the weather as humid when the water vapor
+# in the air is at least 13.5 gram of water per cubic meter of air.
+# The amount of water vapor that air can hold is a function of temperature.
+# The humidity is often given as relative humidity, i.e. at 50% humidity, the
+# air contains half the water vapor it can hold. But 50% humidity at 20 °C is a
+# different amount of water than 50% at 35 °C.
+# Wikipedia kindly provides a table that lists the relative humidity for a
+# given temperature at which people in central Europe will feel the humidity.
+# The minimum temperature required for this is 16 °C, where it's 99%, and
+# as the temperature rises, the relative humidity goes down.
+# At 37 °C, it's only 31%.
+# The table on Wikipedia only goes to 37 °C, but it very rarely gets that
+# warm anyway. (At least for now, climate change might affect that in the future.)
+humid_table: Final[dict[int, int]] = {
+    16: 99,
+    17: 93,
+    18: 88,
+    19: 83,
+    20: 78,
+    21: 74,
+    22: 70,
+    23: 66,
+    24: 62,
+    25: 59,
+    26: 56,
+    27: 53,
+    28: 50,
+    29: 47,
+    30: 43,
+    31: 43,
+    32: 40,
+    33: 38,
+    34: 36,
+    35: 35,
+    36: 33,
+    37: 31,
+}
 
 
 # pylint: disable-msg=R0902,R0903
@@ -96,30 +137,62 @@ class WeatherWarning:
         return summary
 
 
-humid_table: Final[dict[int, int]] = {
-    16: 99,
-    17: 93,
-    18: 88,
-    19: 83,
-    20: 78,
-    21: 74,
-    22: 70,
-    23: 66,
-    24: 62,
-    25: 59,
-    26: 56,
-    27: 53,
-    28: 50,
-    29: 47,
-    30: 43,
-    31: 43,
-    32: 40,
-    33: 38,
-    34: 36,
-    35: 35,
-    36: 33,
-    37: 31,
-}
+class Datapoint:
+    """A Datapoint is part of a weather forecast and includes conditions
+    predicted for some point in the future."""
+
+    # rain_amt is millimeters of rain per square meter per hour
+
+    __slots__ = [
+        'pid',
+        'timestamp',
+        'icon',
+        'probability_rain',
+        'rain_amt',
+        'temperature',
+        'humidity',
+        'pressure',
+        'wind_speed',
+        'cloud_cover',
+        'visibility',
+    ]
+
+    pid: int
+    timestamp: datetime
+    icon: str
+    probability_rain: int
+    rain_amt: float
+    temperature: int
+    humidity: int
+    pressure: float
+    wind_speed: int
+    cloud_cover: int
+    visibility: float
+
+    def __init__(self, wdata: dict, pid: int = 0) -> None:
+        self.pid = pid
+        self.timestamp = datetime.fromtimestamp(wdata['time'])
+        self.icon = wdata['icon']
+        self.probability_rain = int(wdata['precipProbability'] * 100)
+        self.rain_amt = wdata['precipIntensity']
+        self.temperature = int(wdata['temperature'])
+        self.humidity = int(wdata['humidity'] * 100)
+        self.pressure = wdata['pressure']
+        self.wind_speed = int(wdata['windSpeed'])
+        self.cloud_cover = int(wdata['cloudCover'] * 100)
+        self.visibility = wdata['visibility']
+
+    def is_humid(self) -> bool:
+        """Return True if it's humid by central European standards."""
+        humid: bool = False
+        match self.temperature:
+            case x if x < 16:
+                humid = False
+            case x if x in humid_table:
+                humid = self.humidity >= humid_table[x]
+            case _:
+                humid = False
+        return humid
 
 
 class Forecast:
@@ -137,6 +210,7 @@ class Forecast:
         "humidity",
         "wind_speed",
         "visibility",
+        "hourly",
     ]
 
     fid: int
@@ -150,6 +224,7 @@ class Forecast:
     humidity: int
     wind_speed: int
     visibility: float
+    hourly: list[Datapoint]
 
     def __init__(self, forecast: dict, fid: int = 0) -> None:
         assert fid >= 0
@@ -167,6 +242,10 @@ class Forecast:
         self.wind_speed = \
             int(forecast["currently"]["windSpeed"])
         self.visibility = forecast["currently"]["visibility"]
+        self.hourly = []
+        for r in forecast['hourly']['data']:
+            p = Datapoint(r)
+            self.hourly.append(p)
 
     @classmethod
     def from_db(cls, row: tuple) -> Any:
