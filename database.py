@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-12 18:42:11 krylon>
+# Time-stamp: <2024-02-16 22:41:47 krylon>
 #
 # /data/code/python/wetterfrosch/database.py
 # created on 13. 01. 2024
@@ -28,7 +28,7 @@ from typing import Final, Optional
 import krylib
 
 from wetterfrosch import common
-from wetterfrosch.data import Forecast, WeatherWarning
+from wetterfrosch.data import Datapoint, Forecast, WeatherWarning
 
 OPEN_LOCK: Final[threading.Lock] = threading.Lock()
 
@@ -93,6 +93,30 @@ CREATE TABLE forecast (
     CHECK (visibility >= 0)
 ) STRICT""",
     "CREATE UNIQUE INDEX fc_time_idx ON forecast (timestamp)",
+
+    '''
+CREATE TABLE hourly (
+    id INTEGER PRIMARY KEY,
+    forecast_id INTEGER NOT NULL,
+    timestamp INTEGER NOT NULL,
+    icon TEXT NOT NULL,
+    prob_rain INTEGER NOT NULL,
+    temperature INTEGER NOT NULL,
+    humidity INTEGER NOT NULL,
+    pressure REAL NOT NULL,
+    wind_speed INTEGER NOT NULL,
+    cloud_cover INTEGER NOT NULL,
+    visibility REAL NOT NULL,
+    FOREIGN KEY (forecast_id) REFERENCES forecast (id)
+      ON DELETE CASCADE
+      ON UPDATE RESTRICT,
+    CHECK (prob_rain BETWEEN 0 AND 100),
+    CHECK (humidity BETWEEN 0 AND 100),
+    CHECK (cloud_cover BETWEEN 0 AND 100)
+    CHECK (wind_speed >= 0)
+) STRICT
+    ''',
+    "CREATE INDEX h_time_idx ON hourly (timestamp)",
 ]
 
 
@@ -110,6 +134,8 @@ class Query(Enum):
     ForecastGetCurrent = auto()
     ForecastGetRecent = auto()
     ForecastGetByPeriod = auto()
+    HourlyAdd = auto()
+    HourlyGetByForecast = auto()
 
 
 db_queries: Final[dict[Query, str]] = {
@@ -267,6 +293,36 @@ FROM forecast
 WHERE timestamp BETWEEN ? AND ?
 ORDER BY timestamp
 """,
+    Query.HourlyAdd: """
+INSERT INTO hourly (
+    forecast_id,
+    timestamp,
+    icon,
+    prob_rain,
+    temperature,
+    humidity,
+    pressure,
+    wind_speed,
+    cloud_cover,
+    visibility)
+ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """,
+    Query.HourlyGetByForecast: """
+SELECT
+    id,
+    timestamp,
+    icon,
+    prob_rain,
+    temperature,
+    humidity,
+    pressure,
+    wind_speed,
+    cloud_cover,
+    visibility
+FROM hourly
+WHERE forecast_id = ?
+ORDER BY timestamp
+    """,
 }
 
 
@@ -488,6 +544,21 @@ class Database:
             fc = Forecast.from_db(row)
             records.append(fc)
         return records
+
+    def hourly_add(self, fc: Forecast) -> None:
+        """Add the hourly forecast data to the database."""
+        cur = self.db.cursor()
+        cur.executemany(db_queries[Query.HourlyAdd],
+                        fc.hourly_db())
+
+    def hourly_get_by_forecast(self, fid: int) -> list[Datapoint]:
+        """Get the hourly forecast data."""
+        cur = self.db.cursor()
+        cur.execute(db_queries[Query.HourlyGetByForecast], (fid, ))
+        hourly: list[Datapoint] = []
+        for row in cur:
+            pass
+        return hourly
 
 # Local Variables: #
 # python-indent: 4 #

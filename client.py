@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-16 21:27:03 krylon>
+# Time-stamp: <2024-02-16 23:59:57 krylon>
 #
 # /data/code/python/wetterfrosch/dwd.py
 # created on 28. 12. 2023
@@ -338,6 +338,7 @@ class Client:
             db = self.get_database()
             with db:
                 db.forecast_add(fc)
+                db.hourly_add(fc)
             return fc
         except Exception as e:  # pylint: disable-msg=W0718
             self.log.error("Failed to fetch weather forecast: %s",

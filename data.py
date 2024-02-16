@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-16 20:53:31 krylon>
+# Time-stamp: <2024-02-16 22:44:45 krylon>
 #
 # /data/code/python/wetterfrosch/data.py
 # created on 12. 01. 2024
@@ -182,6 +182,17 @@ class Datapoint:
         self.cloud_cover = int(wdata['cloudCover'] * 100)
         self.visibility = wdata['visibility']
 
+    @classmethod
+    def from_db(cls, row: tuple) -> Any:
+        """Create a Datapoint from a database record."""
+        dp = cls.__new__(cls)
+        dp.pid = row[0]
+        dp.timestamp = datetime.fromtimestamp(row[1])
+        dp.icon = row[2]
+        dp.probability_rain = row[3]
+
+        return dp
+
     def is_humid(self) -> bool:
         """Return True if it's humid by central European standards."""
         humid: bool = False
@@ -264,6 +275,24 @@ class Forecast:
         fc.wind_speed = row[9]
         fc.visibility = row[10]
         return fc
+
+    def hourly_db(self) -> list[tuple]:
+        """Return a list of tuples, one for each Datapoint of forecast,
+        suitable for feeding to the database."""
+        res = []
+        for h in self.hourly:
+            t = (self.fid,
+                 int(h.timestamp.timestamp()),
+                 h.icon,
+                 h.probability_rain,
+                 h.temperature,
+                 h.humidity,
+                 h.pressure,
+                 h.wind_speed,
+                 h.cloud_cover,
+                 h.visibility)
+            res.append(t)
+        return res
 
     def is_humid(self) -> bool:
         """Return True if it's humid by central European standards."""
