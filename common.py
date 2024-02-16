@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-12 19:26:11 krylon>
+# Time-stamp: <2024-02-16 21:25:23 krylon>
 #
 # /data/code/python/wetterfrosch/common.py
 # created on 29. 12. 2023
@@ -62,6 +62,14 @@ class Path:
     def config(self) -> str:
         """Return the path of the configuration file"""
         return os.path.join(self.__base, "settings.toml")
+
+    def warning(self) -> str:
+        """Return the path of the most recent warnings fetched from the DWD"""
+        return os.path.join(self.__base, "warnings.json")
+
+    def forecast(self) -> str:
+        """return the path of the most recent forecast fetched from Pirate Weather"""
+        return os.path.join(self.__base, "forecast.json")
 
 
 path: Path = Path(os.path.expanduser(f"~/.{APP_NAME.lower()}.d"))
