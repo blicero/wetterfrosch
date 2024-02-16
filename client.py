@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-14 19:38:50 krylon>
+# Time-stamp: <2024-02-16 21:27:03 krylon>
 #
 # /data/code/python/wetterfrosch/dwd.py
 # created on 28. 12. 2023
@@ -150,7 +150,7 @@ class Client:
         "log",
         "lock",
         "active",
-        "cache",
+        "wcache",
         "known",
         "last_ffetch",
         "finterval",
@@ -166,7 +166,7 @@ class Client:
     winterval: timedelta
     last_ffetch: datetime
     finterval: timedelta
-    cache: Optional[list[data.WeatherWarning]]
+    wcache: Optional[list[data.WeatherWarning]]
     known: set[str]
     fcache: Optional[Forecast]
 
@@ -185,7 +185,7 @@ class Client:
             self.loc_patterns = LocationList.new()
         self.last_wfetch = datetime.fromtimestamp(0)
         self.last_ffetch = datetime.fromtimestamp(0)
-        self.cache = None
+        self.wcache = None
         self.known = self.get_database().warning_get_keys()
         self.fcache = None
 
@@ -258,7 +258,7 @@ class Client:
             self.log.info("Last fetch was %s, next fetch is not due until %s",
                           self.last_wfetch.strftime(common.TIME_FMT),
                           next_fetch.strftime(common.TIME_FMT))
-            return self.cache
+            return self.wcache
 
         try:
             res = requests.get(WARNINGS_URL, verify=True, timeout=5)
@@ -285,6 +285,8 @@ class Client:
                 return None
 
             payload: Final[str] = m[1]
+            with open(common.path.warning(), 'w', encoding='utf-8') as fh:
+                fh.write(payload)
             records: dict = json.loads(payload)
             processed: list[data.WeatherWarning] = []
             self.last_wfetch = datetime.now()
@@ -300,7 +302,8 @@ class Client:
                                 db.warning_add(w)
                             self.known.add(w.cksum())
 
-            self.cache = processed
+            with self.lock:
+                self.wcache = processed
             return processed
         except Exception as e:  # pylint: disable-msg=W0718
             self.log.error("Failed to fetch weather warnings: %s",
@@ -325,10 +328,13 @@ class Client:
                     return None
 
             body: Final[str] = res.content.decode()
+            with open(common.path.forecast(), 'w', encoding='utf-8') as fh:
+                fh.write(body)
             records: dict[str, Any] = json.loads(body)
             self.last_ffetch = datetime.now()
             fc: Forecast = Forecast(records)
-            self.fcache = fc
+            with self.lock:
+                self.fcache = fc
             db = self.get_database()
             with db:
                 db.forecast_add(fc)
@@ -337,6 +343,16 @@ class Client:
             self.log.error("Failed to fetch weather forecast: %s",
                            pprint.pformat(e.args))
             return None
+
+    def get_warnings_cached(self) -> Optional[list[data.WeatherWarning]]:
+        """Return the cached warnings, if there are any."""
+        with self.lock:
+            return self.wcache
+
+    def get_forecast_cached(self) -> Optional[Forecast]:
+        """Return the cached Forecast, if there is one."""
+        with self.lock:
+            return self.fcache
 
 
 # Local Variables: #
