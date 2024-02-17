@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-14 19:46:57 krylon>
+# Time-stamp: <2024-02-17 20:57:57 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -19,13 +19,13 @@ wetterfrosch.gui
 
 import json
 import re
+import sys
 import traceback
 from datetime import datetime, timedelta
 from threading import Lock, local
 from typing import Any, Final, Optional
 
 import gi  # type: ignore
-import krylib
 import notify2  # type: ignore
 import requests  # type: ignore
 
@@ -74,21 +74,21 @@ class WetterGUI:
         self.fc_stamp: datetime = datetime.fromtimestamp(0)
         self.location: list[str] = []
 
-        loc: str = self.get_location()
-        if loc != "":
-            self.location.append(loc)
+        # loc: str = self.get_location()
+        # if loc != "":
+        #     self.location.append(loc)
 
-        loc_path: Final[str] = common.path.locations()
+        # loc_path: Final[str] = common.path.locations()
 
-        if krylib.fexist(loc_path):
-            with open(loc_path,
-                      "r",
-                      encoding="utf-8") \
-                    as fh:  # pylint: disable-msg=C0103
-                for line in fh:
-                    self.location.append(line.strip())
+        # if krylib.fexist(loc_path):
+        #     with open(loc_path,
+        #               "r",
+        #               encoding="utf-8") \
+        #             as fh:  # pylint: disable-msg=C0103
+        #         for line in fh:
+        #             self.location.append(line.strip())
 
-        self.location = sorted(set(self.location))
+        # self.location = sorted(set(self.location))
 
         if clnt is None:
             self.client = client.Client(30, self.location)
@@ -103,7 +103,7 @@ class WetterGUI:
         # Create window and widgets ####################################
         ################################################################
 
-        columns: Final[list[tuple[int, str]]] = [
+        warn_columns: Final[list[tuple[int, str]]] = [
             (0, "ID"),
             (1, "Level"),
             (2, "Region"),
@@ -115,7 +115,7 @@ class WetterGUI:
             (8, "Hinweise"),
         ]
 
-        self.store = gtk.ListStore(
+        self.warning_store = gtk.ListStore(
             int,  # 0, Record ID
             int,  # 1, Level
             str,  # 2, Region
@@ -125,6 +125,32 @@ class WetterGUI:
             str,  # 6, Headline
             str,  # 7, Description
             str,  # 8, Instructions
+        )
+
+        fc_columns: Final[list[tuple[int, str]]] = [
+            (0, "ID"),
+            (1, "Zeitpunkt"),
+            (2, "% Regen"),
+            (3, "Regenmenge"),
+            (4, "Temperatur"),
+            (5, "Luftfeuchtigkeit"),
+            (6, "Luftdruck"),
+            (7, "Wind (m/s)"),
+            (8, "% Bedeckt"),
+            (9, "Sichtweite"),
+        ]
+
+        self.fc_store = gtk.ListStore(
+            int,        # 0, ID
+            str,        # 1, Zeitpunkt
+            int,        # 2, % Regen
+            float,      # 3, Regenmenge
+            int,        # 4, Temperatur
+            int,        # 5, Luftfeuchtigkeit
+            float,      # 6, Luftdruck
+            int,        # 7, Wingeschwindigkeit
+            int,        # 8, % Bedeckt
+            float,      # 9, Sichtweite
         )
 
         self.win = gtk.Window()
@@ -208,10 +234,12 @@ class WetterGUI:
         for v in fc_views:
             v.editable = False
 
-        self.warn_view = gtk.TreeView(model=self.store)
+        self.notebook = gtk.Notebook.new()
 
-        for c in columns:  # pylint: disable-msg=C0103
-            col: gtk.TreeViewColumn = gtk.TreeViewColumn(
+        self.warn_view = gtk.TreeView(model=self.warning_store)
+
+        for c in warn_columns:  # pylint: disable-msg=C0103
+            col = gtk.TreeViewColumn(
                 c[1],
                 gtk.CellRendererText(),
                 text=c[0],
@@ -219,7 +247,20 @@ class WetterGUI:
             )
             self.warn_view.append_column(col)
 
-        self.scrolled_view: gtk.ScrolledWindow = gtk.ScrolledWindow()
+        self.sw_warning: gtk.ScrolledWindow = gtk.ScrolledWindow()
+
+        self.forecast_view = gtk.TreeView(model=self.fc_store)
+
+        for c in fc_columns:
+            col = gtk.TreeViewColumn(
+                c[1],
+                gtk.CellRendererText(),
+                text=c[0],
+                size=12,
+            )
+            self.forecast_view.append_column(col)
+
+        self.sw_forecast: gtk.ScrolledWindow = gtk.ScrolledWindow()
 
         ################################################################
         # Assemble window and widgets ##################################
@@ -240,6 +281,24 @@ class WetterGUI:
         self.fc_grid.attach(self.fc_lbl_prob_rain, 6, 1, 1, 1)
         self.fc_grid.attach(self.fc_view_prob_rain, 7, 1, 1, 1)
 
+        # For some reason, pylint has thinks a couple of methods we call here
+        # on gtk Widgets do not exist when in fact they do. So I disable them
+        # on a case-by-case basis.
+
+        self.sw_warning.set_vexpand(True)
+        self.sw_warning.set_hexpand(True)
+        self.sw_warning.add(self.warn_view)  # pylint: disable-msg=E1101
+
+        self.sw_forecast.set_vexpand(True)
+        self.sw_forecast.set_hexpand(True)
+        self.sw_forecast.add(self.forecast_view)  # pylint: disable-msg=E1101
+
+        self.nb_lbl_warn = gtk.Label.new("Warnungen")
+        self.nb_lbl_forecast = gtk.Label.new("Vorhersage")
+
+        self.notebook.append_page(self.sw_warning, self.nb_lbl_warn)
+        self.notebook.append_page(self.sw_forecast, self.nb_lbl_forecast)
+
         self.win.add(self.mbox)  # pylint: disable-msg=E1101
         self.mbox.pack_start(self.menubar,  # pylint: disable-msg=E1101
                              False,
@@ -249,13 +308,14 @@ class WetterGUI:
                              False,
                              True,
                              0)
-        self.mbox.pack_start(self.scrolled_view,  # pylint: disable-msg=E1101
+        # self.mbox.pack_start(self.scrolled_view,  # pylint: disable-msg=E1101
+        #                      False,
+        #                      True,
+        #                      0)
+        self.mbox.pack_start(self.notebook,
                              False,
                              True,
                              0)
-        self.scrolled_view.set_vexpand(True)
-        self.scrolled_view.set_hexpand(True)
-        self.scrolled_view.add(self.warn_view)  # pylint: disable-msg=E1101
 
         ################################################################
         # Create menu ##################################################
@@ -327,12 +387,28 @@ class WetterGUI:
             self.log.error("Failed to get location: %s", e)
             return ""
 
+    def icon_from_forecast(self) -> str:
+        """Try to generate an icon name from the forecast"""
+        name: Final[str] = self.cur_forecast.icon
+        icon: Final[str] = f"weather-{name}-symbolic"
+        self.log.debug("Forecast says %s, icon is %s",
+                       self.cur_forecast.icon,
+                       icon)
+        return icon
+
     def update_forecast(self) -> bool:
         """Refresh the weather forecast"""
         try:
             db = self.get_database()
             fc = db.forecast_get_current()
             if fc is not None:
+                self.cur_forecast = fc  # pylint: disable-msg=W0201
+                try:
+                    self.win.set_icon_name(self.icon_from_forecast())
+                except:  # noqa: B001,E722 pylint: disable-msg=W0702
+                    self.log.error("Cannot set window icon to %s: %s",
+                                   self.cur_forecast.icon,
+                                   sys.exception())
                 if fc.timestamp == self.fc_stamp:
                     # self.log.debug("Weather forecast is already current.")
                     return True
@@ -348,6 +424,24 @@ class WetterGUI:
                     f"{fc.wind_speed} km/h")
                 self.fc_view_prob_rain.get_buffer().set_text(
                     f"{fc.probability_rain} %")
+                self.fc_store.clear()
+                for p in fc.hourly:
+                    fiter = self.fc_store.append()
+                    self.fc_store.set(
+                        fiter,
+                        (0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
+                        (
+                            p.pid,
+                            p.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
+                            p.probability_rain,
+                            p.rain_amt,
+                            p.temperature,
+                            p.humidity,
+                            p.pressure,
+                            p.wind_speed,
+                            p.cloud_cover,
+                            p.visibility,
+                        ))
             else:
                 self.log.error("Client did not return forecast data")
         except Exception as e:  # pylint: disable-msg=W0718
@@ -418,7 +512,7 @@ class WetterGUI:
 
     def display_data(self, data: list[WeatherWarning]) -> None:
         """Display weather warnings."""
-        self.store.clear()
+        self.warning_store.clear()
         now: Final[datetime] = datetime.now()
         has_warnings: bool = False
         delta: Final[timedelta] = timedelta(hours=12)
@@ -443,8 +537,8 @@ class WetterGUI:
                     with self.lock:
                         self.alert_cache.add(event.cksum())
 
-                liter = self.store.append()
-                self.store.set(
+                liter = self.warning_store.append()
+                self.warning_store.set(
                     liter,
                     (0, 1, 2, 3, 4, 5, 6, 7, 8),
                     (
