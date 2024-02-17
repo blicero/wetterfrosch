@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-16 23:59:57 krylon>
+# Time-stamp: <2024-02-17 14:55:49 krylon>
 #
 # /data/code/python/wetterfrosch/dwd.py
 # created on 28. 12. 2023
@@ -28,10 +28,13 @@ from threading import Lock, Thread, local
 from typing import Any, Final, Optional, Union
 from warnings import warn
 
+import krylib
 import requests  # type: ignore
 
 from wetterfrosch import common, data, database
 from wetterfrosch.data import Forecast
+
+IPINFO_URL: Final[str] = "https://ipinfo.io/json"
 
 WARNINGS_URL: Final[str] = \
     "https://www.dwd.de/DWD/warnungen/warnapp/json/warnings.json"
@@ -182,7 +185,13 @@ class Client:
         if patterns is not None:
             self.loc_patterns = LocationList.new(*patterns)
         else:
-            self.loc_patterns = LocationList.new()
+            here: Final[str] = self.get_location()
+            locations: list[str] = [here]
+            if krylib.fexist(common.path.locations()):
+                with open(common.path.locations(), "r", encoding="utf-8") as fh:
+                    patterns = [x.strip() for x in fh.readlines()]
+                    locations += patterns
+            self.loc_patterns = LocationList.new(*locations)
         self.last_wfetch = datetime.fromtimestamp(0)
         self.last_ffetch = datetime.fromtimestamp(0)
         self.wcache = None
@@ -197,6 +206,20 @@ class Client:
             db = database.Database()  # pylint: disable-msg=C0103
             self.local.db = db
             return db
+
+    def get_location(self) -> str:
+        """Try to determine our location (city) using ipinfo.io"""
+        try:
+            res = requests.get(IPINFO_URL, verify=True, timeout=5)
+            if res.status_code != 200:
+                return ""
+            body = res.json()
+            # self.coords = [float(x) for x in data["loc"].split(",")]
+            # self.here = data["city"]
+            return body["city"]
+        except Exception as e:  # pylint: disable-msg=W0718,C0103
+            self.log.error("Failed to get location: %s", e)
+            return ""
 
     def is_active(self) -> bool:
         """Return the Client's active flag, i.e. if the workers are running."""
