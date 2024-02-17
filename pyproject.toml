@@ -1,5 +1,5 @@
 [tool.pylint.main]
-# Time-stamp: <2024-02-09 19:15:33 krylon>
+# Time-stamp: <2024-02-17 16:33:53 krylon>
 # Analyse import fallback blocks. This can be used to support both Python 2 and 3
 # compatible code, which means that the block might have code that exists only in
 # one or another interpreter, leading to false positives when analysed.
@@ -550,3 +550,7 @@ ignored-argument-names = "_.*|^ignored_|^unused_"
 redefining-builtins-modules = ["six.moves", "past.builtins", "future.builtins", "builtins", "io"]
 
 
+[tool.pytest.ini_options]
+filterwarnings = [
+               "ignore::UserWarning",
+]
