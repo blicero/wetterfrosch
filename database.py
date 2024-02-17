@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-17 14:51:48 krylon>
+# Time-stamp: <2024-02-17 15:04:33 krylon>
 #
 # /data/code/python/wetterfrosch/database.py
 # created on 13. 01. 2024
@@ -533,7 +533,9 @@ class Database:
         row = cur.fetchone()
         if row is None:
             return None
-        return Forecast.from_db(row)
+        fc = Forecast.from_db(row)
+        fc.hourly = self.hourly_get_by_forecast(fc.fid)
+        return fc
 
     def forecast_get_recent(self, n: int = 5) -> list[Forecast]:
         """Get the <n> most recent Forecast items."""
