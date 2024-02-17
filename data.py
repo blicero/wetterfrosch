@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-16 22:44:45 krylon>
+# Time-stamp: <2024-02-17 16:37:08 krylon>
 #
 # /data/code/python/wetterfrosch/data.py
 # created on 12. 01. 2024
@@ -190,6 +190,13 @@ class Datapoint:
         dp.timestamp = datetime.fromtimestamp(row[1])
         dp.icon = row[2]
         dp.probability_rain = row[3]
+        dp.rain_amt = row[4]
+        dp.temperature = row[5]
+        dp.humidity = row[6]
+        dp.pressure = row[7]
+        dp.wind_speed = row[8]
+        dp.cloud_cover = row[9]
+        dp.visibility = row[10]
 
         return dp
 
@@ -285,6 +292,7 @@ class Forecast:
                  int(h.timestamp.timestamp()),
                  h.icon,
                  h.probability_rain,
+                 h.rain_amt,
                  h.temperature,
                  h.humidity,
                  h.pressure,
