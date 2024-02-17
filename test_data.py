@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-06 15:05:19 krylon>
+# Time-stamp: <2024-02-17 16:16:59 krylon>
 #
 # /data/code/python/wetterfrosch/test_data.py
 # created on 01. 02. 2024
@@ -77,8 +77,10 @@ class ForecastTest(unittest.TestCase):
     def test_02_from_db_row(self) -> None:
         """Test creating a Forecast from a database row (i.e. tuple)"""
         test_tuples: Final[list[tuple]] = [
-            (1, 1707083280, "52.0333/8.5333", "Rain", "rain", 75, 7, 7, 95, 5, 10),
-            (2, 1707083280+300, "52.0333/8.5333", "Rain", "rain", 67, 6, 3, 70, 15, 10),
+            (1, 1707083280, "52.0333/8.5333", "Rain", "rain",
+             75, 7, 7, 95, 5, 10),
+            (2, 1707083280+300, "52.0333/8.5333", "Rain", "rain",
+             67, 6, 3, 70, 15, 10),
         ]
 
         for t in test_tuples:
