@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-17 15:04:33 krylon>
+# Time-stamp: <2024-02-17 16:13:39 krylon>
 #
 # /data/code/python/wetterfrosch/database.py
 # created on 13. 01. 2024
@@ -101,6 +101,7 @@ CREATE TABLE hourly (
     timestamp INTEGER NOT NULL,
     icon TEXT NOT NULL,
     prob_rain INTEGER NOT NULL,
+    rain_amt REAL NOT NULL,
     temperature INTEGER NOT NULL,
     humidity INTEGER NOT NULL,
     pressure REAL NOT NULL,
@@ -299,13 +300,14 @@ INSERT INTO hourly (
     timestamp,
     icon,
     prob_rain,
+    rain_amt,
     temperature,
     humidity,
     pressure,
     wind_speed,
     cloud_cover,
     visibility)
- VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """,
     Query.HourlyGetByForecast: """
 SELECT
@@ -313,6 +315,7 @@ SELECT
     timestamp,
     icon,
     prob_rain,
+    rain_amt,
     temperature,
     humidity,
     pressure,
