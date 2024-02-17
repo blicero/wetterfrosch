@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-16 22:41:47 krylon>
+# Time-stamp: <2024-02-17 14:51:48 krylon>
 #
 # /data/code/python/wetterfrosch/database.py
 # created on 13. 01. 2024
@@ -557,7 +557,8 @@ class Database:
         cur.execute(db_queries[Query.HourlyGetByForecast], (fid, ))
         hourly: list[Datapoint] = []
         for row in cur:
-            pass
+            d = Datapoint.from_db(row)
+            hourly.append(d)
         return hourly
 
 # Local Variables: #
