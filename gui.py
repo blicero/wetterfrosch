@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-19 19:23:44 krylon>
+# Time-stamp: <2024-02-19 21:31:43 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -56,7 +56,7 @@ NEWLINE: Final[str] = "\n"
 IPINFO_URL: Final[str] = "https://ipinfo.io/json"
 
 ICON_NAMES: Final[dict[str, str]] = {
-    "cloudy": "clouds",
+    "cloudy": "cloudy",
     "clear-night": "clear-night",
     "partly-cloudy-night": "few-clouds-night",
     "partly-cloudy-day": "few-clouds",
