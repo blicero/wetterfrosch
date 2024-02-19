@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-17 20:57:57 krylon>
+# Time-stamp: <2024-02-19 13:43:18 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -54,6 +54,13 @@ FETCH_INTERVAL: Final[int] = 300
 NEWLINE: Final[str] = "\n"
 
 IPINFO_URL: Final[str] = "https://ipinfo.io/json"
+
+ICON_NAMES: Final[dict[str, str]] = {
+    "cloudy": "clouds",
+    "clear-night": "clear-night",
+    "partly-cloudy-night": "few-clouds-night",
+    "partly-cloudy-day": "few-clouds",
+}
 
 
 # pylint: disable-msg=R0902,R0903
@@ -389,7 +396,9 @@ class WetterGUI:
 
     def icon_from_forecast(self) -> str:
         """Try to generate an icon name from the forecast"""
-        name: Final[str] = self.cur_forecast.icon
+        name: str = self.cur_forecast.icon
+        if name in ICON_NAMES:
+            name = ICON_NAMES[name]
         icon: Final[str] = f"weather-{name}-symbolic"
         self.log.debug("Forecast says %s, icon is %s",
                        self.cur_forecast.icon,
@@ -404,7 +413,9 @@ class WetterGUI:
             if fc is not None:
                 self.cur_forecast = fc  # pylint: disable-msg=W0201
                 try:
-                    self.win.set_icon_name(self.icon_from_forecast())
+                    icon = self.icon_from_forecast()
+                    self.win.set_icon_name(icon)
+                    self.tray.set_from_icon_name(icon)
                 except:  # noqa: B001,E722 pylint: disable-msg=W0702
                     self.log.error("Cannot set window icon to %s: %s",
                                    self.cur_forecast.icon,
