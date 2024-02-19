@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-02-19 20:27:45 krylon>
+# Time-stamp: <2024-02-19 23:00:37 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -13,18 +13,19 @@
   German Weather Service (Deutscher Wetterdienst, [[https://www.dwd.de/][DWD]]) and display them.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2024-02-19 Mo 19:37]
+   #+CAPTION: Clock summary at [2024-02-19 Mo 23:00]
    | Headline                                       | Time       |            |          |       |      |
    |------------------------------------------------+------------+------------+----------+-------+------|
-   | *Total time*                                   | *4d 13:41* |            |          |       |      |
+   | *Total time*                                   | *4d 15:11* |            |          |       |      |
    |------------------------------------------------+------------+------------+----------+-------+------|
-   | *Wetterfrosch*                                 | *4d 13:41* |            |          |       |      |
-   | \_  /Features [1/2]/                           |            | /1d 20:08/ |          |       |      |
+   | *Wetterfrosch*                                 | *4d 15:11* |            |          |       |      |
+   | \_  /Features [5/6]/                           |            | /1d 21:38/ |          |       |      |
    | \_    More data [4/4]                          |            |            | 1d 20:08 |       |      |
    | \_      Forecast [3/3]                         |            |            |          |  7:33 |      |
    | \_        Client / Data model                  |            |            |          |       | 1:09 |
    | \_        Database                             |            |            |          |       | 0:03 |
    | \_        GUI                                  |            |            |          |       | 6:21 |
+   | \_    Graphs [0/0]                             |            |            |     1:30 |       |      |
    | \_  /Components [15/16]/                       |            | /2d 12:06/ |          |       |      |
    | \_    "main" [0/0]                             |            |            |     2:00 |       |      |
    | \_    Configuration [0/0]                      |            |            |     2:00 |       |      |
@@ -110,8 +111,18 @@
     :COOKIE_DATA: todo recursive
     :VISIBILITY: children
     :END:
+    :LOGBOOK:
+    CLOCK: [2024-02-19 Mo 21:30]--[2024-02-19 Mo 23:00] =>  1:30
+    :END:
     I would like to display graphs. And it wouldn't hurt if they looked
     pretty-ish.
+
+    [2024-02-19 Mo 22:03]
+    Okay, my first candidate was plotly, which upon closer inspection is not
+    what I am looking for. If I was writing a web application, it would be
+    just perfect, however.
+    My second candidate is matplotlib, which plotly uses behind the scenes.
+    This seems to be closer to what I have in mind.
 ** Components [15/16]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
