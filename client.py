@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-17 14:55:49 krylon>
+# Time-stamp: <2024-02-19 18:12:43 krylon>
 #
 # /data/code/python/wetterfrosch/dwd.py
 # created on 28. 12. 2023
@@ -47,6 +47,15 @@ PIRATE_URL: Final[str] = \
     "/bqiCjEJd20p0mCOJhCDC6Cs1AoCHOhzg" + \
     "/52.001259788359754,8.538241122650915" + \
     "?units=si"
+
+
+def pirate_url(coords: tuple[float, float]) -> str:
+    """Generate the URL for the Pirate Weather API"""
+    addr: Final[str] = "https://api.pirateweather.net/forecast" + \
+        "/bqiCjEJd20p0mCOJhCDC6Cs1AoCHOhzg" + \
+        f"/{coords[0]},{coords[1]}" + \
+        "?units=si"
+    return addr
 
 
 class LocationList:
@@ -150,6 +159,8 @@ class Client:
         "last_wfetch",
         "winterval",
         "loc_patterns",
+        "here",
+        "coords",
         "log",
         "lock",
         "active",
@@ -158,12 +169,15 @@ class Client:
         "last_ffetch",
         "finterval",
         "fcache",
+        "pirate_url",
     ]
 
     local: local
     log: logging.Logger
     last_wfetch: datetime
     loc_patterns: LocationList
+    here: str
+    coords: tuple[float, float]
     lock: Lock
     active: bool
     winterval: timedelta
@@ -172,6 +186,7 @@ class Client:
     wcache: Optional[list[data.WeatherWarning]]
     known: set[str]
     fcache: Optional[Forecast]
+    pirate_url: str
 
     _loc: list[str] = []
 
@@ -185,13 +200,15 @@ class Client:
         if patterns is not None:
             self.loc_patterns = LocationList.new(*patterns)
         else:
-            here: Final[str] = self.get_location()
+            loc = self.get_location()
+            here: Final[str] = loc[0]
             locations: list[str] = [here]
             if krylib.fexist(common.path.locations()):
-                with open(common.path.locations(), "r", encoding="utf-8") as fh:
+                with open(common.path.locations(), "r", encoding="utf-8") as fh:  # noqa: E501
                     patterns = [x.strip() for x in fh.readlines()]
                     locations += patterns
             self.loc_patterns = LocationList.new(*locations)
+        self.pirate_url = pirate_url(self.coords)
         self.last_wfetch = datetime.fromtimestamp(0)
         self.last_ffetch = datetime.fromtimestamp(0)
         self.wcache = None
@@ -207,19 +224,20 @@ class Client:
             self.local.db = db
             return db
 
-    def get_location(self) -> str:
+    def get_location(self) -> tuple[str, tuple[float, float]]:
         """Try to determine our location (city) using ipinfo.io"""
         try:
             res = requests.get(IPINFO_URL, verify=True, timeout=5)
             if res.status_code != 200:
-                return ""
+                return ("", (0.0, 0.0))
             body = res.json()
-            # self.coords = [float(x) for x in data["loc"].split(",")]
-            # self.here = data["city"]
-            return body["city"]
+            coords = [float(x) for x in body["loc"].split(",")]
+            self.coords = (coords[0], coords[1])
+            self.here = body["city"]
+            return (body["city"], self.coords)
         except Exception as e:  # pylint: disable-msg=W0718,C0103
             self.log.error("Failed to get location: %s", e)
-            return ""
+            return ("", (0.0, 0.0))
 
     def is_active(self) -> bool:
         """Return the Client's active flag, i.e. if the workers are running."""
@@ -342,7 +360,7 @@ class Client:
                           next_fetch.strftime(common.TIME_FMT))
             return self.fcache
         try:
-            res = requests.get(PIRATE_URL, verify=True, timeout=5)
+            res = requests.get(self.pirate_url, verify=True, timeout=5)
             match res.status_code:
                 case 200:
                     pass
