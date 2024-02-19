@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-19 18:13:36 krylon>
+# Time-stamp: <2024-02-19 19:23:44 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -60,6 +60,7 @@ ICON_NAMES: Final[dict[str, str]] = {
     "clear-night": "clear-night",
     "partly-cloudy-night": "few-clouds-night",
     "partly-cloudy-day": "few-clouds",
+    "rain": "showers",
 }
 
 
