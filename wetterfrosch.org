@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-02-19 19:37:54 krylon>
+# Time-stamp: <2024-02-19 20:27:45 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -45,7 +45,7 @@
    | \_    Notifications                            |            |            |     1:06 |       |      |
    | \_    Crash nach Dialog                        |            |            |     4:21 |       |      |
    #+END:
-** Features [1/2]
+** Features [5/6]                                                   :feature:
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -105,6 +105,13 @@
       :LOGBOOK:
       CLOCK: [2024-02-17 Sa 15:07]--[2024-02-17 Sa 21:28] =>  6:21
       :END:
+*** RESEARCH Graphs [0/0]                                     :ui:meditation:
+    :PROPERTIES:
+    :COOKIE_DATA: todo recursive
+    :VISIBILITY: children
+    :END:
+    I would like to display graphs. And it wouldn't hurt if they looked
+    pretty-ish.
 ** Components [15/16]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
