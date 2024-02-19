@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-02-17 22:01:17 krylon>
+# Time-stamp: <2024-02-19 19:37:54 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -13,14 +13,14 @@
   German Weather Service (Deutscher Wetterdienst, [[https://www.dwd.de/][DWD]]) and display them.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2024-02-17 Sa 22:01]
+   #+CAPTION: Clock summary at [2024-02-19 Mo 19:37]
    | Headline                                       | Time       |            |          |       |      |
    |------------------------------------------------+------------+------------+----------+-------+------|
    | *Total time*                                   | *4d 13:41* |            |          |       |      |
    |------------------------------------------------+------------+------------+----------+-------+------|
    | *Wetterfrosch*                                 | *4d 13:41* |            |          |       |      |
    | \_  /Features [1/2]/                           |            | /1d 20:08/ |          |       |      |
-   | \_    More data [0/1]                          |            |            | 1d 20:08 |       |      |
+   | \_    More data [4/4]                          |            |            | 1d 20:08 |       |      |
    | \_      Forecast [3/3]                         |            |            |          |  7:33 |      |
    | \_        Client / Data model                  |            |            |          |       | 1:09 |
    | \_        Database                             |            |            |          |       | 0:03 |
@@ -50,7 +50,7 @@
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
    :END:
-*** DONE More data [0/1]
+*** DONE More data [4/4]
     CLOSED: [2024-02-07 Mi 19:04]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
@@ -81,7 +81,8 @@
     free API key that allows me to make 10,000 requests per month (~320 per
     day, about one every five minutes). I have not looked into their API yet,
     my API key is *bqiCjEJd20p0mCOJhCDC6Cs1AoCHOhzg*.
-**** TODO Forecast [3/3]                                            :feature:
+**** DONE Forecast [3/3]                                            :feature:
+     CLOSED: [2024-02-19 Mo 19:37]
      :PROPERTIES:
      :COOKIE_DATA: todo recursive
      :VISIBILITY: children
