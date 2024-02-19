@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-19 13:43:18 krylon>
+# Time-stamp: <2024-02-19 18:13:36 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -397,7 +397,7 @@ class WetterGUI:
     def icon_from_forecast(self) -> str:
         """Try to generate an icon name from the forecast"""
         name: str = self.cur_forecast.icon
-        if name in ICON_NAMES:
+        if name in ICON_NAMES:  # pylint: disable-msg=R1715
             name = ICON_NAMES[name]
         icon: Final[str] = f"weather-{name}-symbolic"
         self.log.debug("Forecast says %s, icon is %s",
