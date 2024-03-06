@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-19 21:31:43 krylon>
+# Time-stamp: <2024-03-06 16:24:54 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -20,6 +20,7 @@ wetterfrosch.gui
 import json
 import re
 import sys
+import time
 import traceback
 from datetime import datetime, timedelta
 from threading import Lock, local
@@ -56,7 +57,7 @@ NEWLINE: Final[str] = "\n"
 IPINFO_URL: Final[str] = "https://ipinfo.io/json"
 
 ICON_NAMES: Final[dict[str, str]] = {
-    "cloudy": "cloudy",
+    "cloudy": "clouds",
     "clear-night": "clear-night",
     "partly-cloudy-night": "few-clouds-night",
     "partly-cloudy-day": "few-clouds",
@@ -153,8 +154,8 @@ class WetterGUI:
             str,        # 1, Zeitpunkt
             int,        # 2, % Regen
             float,      # 3, Regenmenge
-            int,        # 4, Temperatur
-            int,        # 5, Luftfeuchtigkeit
+            str,        # 4, Temperatur
+            str,        # 5, Luftfeuchtigkeit
             float,      # 6, Luftdruck
             int,        # 7, Wingeschwindigkeit
             int,        # 8, % Bedeckt
@@ -447,8 +448,8 @@ class WetterGUI:
                             p.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
                             p.probability_rain,
                             p.rain_amt,
-                            p.temperature,
-                            p.humidity,
+                            f"{p.temperature} °C",
+                            f"{p.humidity} %",
                             p.pressure,
                             p.wind_speed,
                             p.cloud_cover,
@@ -465,6 +466,7 @@ class WetterGUI:
             self.win.hide()
         else:
             self.win.show_all()  # pylint: disable-msg=E1101
+            self.win.present_with_time(int(time.time()))
         self.visible = not self.visible
 
     def __quit(self, *_ignore: Any) -> None:

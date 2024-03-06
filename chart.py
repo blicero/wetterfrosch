@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-19 23:00:26 krylon>
+# Time-stamp: <2024-03-06 16:26:08 krylon>
 #
 # /data/code/python/wetterfrosch/chart.py
 # created on 19. 02. 2024
@@ -58,7 +58,8 @@ class Plotter:
 
     def render_chart(self, d1: datetime, d2: datetime, path: str) -> None:
         """Render the forecast data for the given period."""
-        pass
+        # db = self.get_db()
+
 
 # Local Variables: #
 # python-indent: 4 #

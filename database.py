@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-17 16:13:39 krylon>
+# Time-stamp: <2024-02-20 14:20:24 krylon>
 #
 # /data/code/python/wetterfrosch/database.py
 # created on 13. 01. 2024
@@ -549,6 +549,20 @@ class Database:
             fc = Forecast.from_db(row)
             records.append(fc)
         return records
+
+    def forecast_get_by_period(self, d1: datetime, d2: datetime) -> list[Forecast]:
+        """Get the forecast data for the given period."""
+        if d1 >= d2:
+            raise ValueError("d1 must be before d2")
+        results: list[Forecast] = []
+        cur: Final[sqlite3.Cursor] = self.db.cursor()
+        cur.execute(db_queries[Query.ForecastGetByPeriod], (d1.timestamp(), d2.timestamp()))
+        for row in cur:
+            fc = Forecast.from_db(row)
+            fc.hourly = self.hourly_get_by_forecast(fc.fid)
+            results.append(fc)
+
+        return results
 
     def hourly_add(self, fc: Forecast) -> None:
         """Add the hourly forecast data to the database."""
