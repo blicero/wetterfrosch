@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-03-06 16:24:54 krylon>
+# Time-stamp: <2024-04-06 17:38:36 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -209,6 +209,7 @@ class WetterGUI:
         self.fc_lbl_temp: gtk.Label = gtk.Label.new("Temperatur")
         self.fc_lbl_humid: gtk.Label = gtk.Label.new("Luftfeuchtigkeit")
         self.fc_lbl_wind: gtk.Label = gtk.Label.new("Windgeschwindigkeit")
+        self.fc_lbl_schwül: gtk.Label = gtk.Label.new("Schwül")
         self.fc_view_time: gtk.TextView = gtk.TextView.new()
         self.fc_view_loc: gtk.TextView = gtk.TextView.new()
         self.fc_view_summary: gtk.TextView = gtk.TextView.new()
@@ -216,6 +217,7 @@ class WetterGUI:
         self.fc_view_temp: gtk.TextView = gtk.TextView.new()
         self.fc_view_humid: gtk.TextView = gtk.TextView.new()
         self.fc_view_wind: gtk.TextView = gtk.TextView.new()
+        self.fc_view_schwül: gtk.TextView = gtk.TextView.new()
 
         fc_labels: tuple[gtk.Label, ...] = (
             self.fc_lbl_time,
@@ -225,6 +227,7 @@ class WetterGUI:
             self.fc_lbl_temp,
             self.fc_lbl_humid,
             self.fc_lbl_wind,
+            self.fc_lbl_schwül,
         )
 
         for lbl in fc_labels:
@@ -238,6 +241,7 @@ class WetterGUI:
             self.fc_view_temp,
             self.fc_view_humid,
             self.fc_view_wind,
+            self.fc_view_schwül,
         )
 
         for v in fc_views:
@@ -281,6 +285,8 @@ class WetterGUI:
         self.fc_grid.attach(self.fc_view_loc, 3, 0, 1, 1)
         self.fc_grid.attach(self.fc_lbl_summary, 4, 0, 1, 1)
         self.fc_grid.attach(self.fc_view_summary, 5, 0, 1, 1)
+        self.fc_grid.attach(self.fc_lbl_schwül, 6, 0, 1, 1)
+        self.fc_grid.attach(self.fc_view_schwül, 7, 0, 1, 1)
         self.fc_grid.attach(self.fc_lbl_temp, 0, 1, 1, 1)
         self.fc_grid.attach(self.fc_view_temp, 1, 1, 1, 1)
         self.fc_grid.attach(self.fc_lbl_humid, 2, 1, 1, 1)
@@ -438,6 +444,10 @@ class WetterGUI:
                 self.fc_view_prob_rain.get_buffer().set_text(
                     f"{fc.probability_rain} %")
                 self.fc_store.clear()
+                if fc.is_humid():
+                    self.fc_view_schwül.get_buffer().set_text("SCHWÜL!!!!")
+                else:
+                    self.fc_view_schwül.get_buffer().set_text("eher nicht")
                 for p in fc.hourly:
                     fiter = self.fc_store.append()
                     self.fc_store.set(
