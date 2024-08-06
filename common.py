@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-19 19:38:39 krylon>
+# Time-stamp: <2024-08-06 17:46:53 krylon>
 #
 # /data/code/python/wetterfrosch/common.py
 # created on 29. 12. 2023
@@ -23,7 +23,7 @@ from typing import Final
 from threading import Lock
 
 APP_NAME: Final[str] = "Wetterfrosch"
-APP_VERSION: Final[str] = "0.2.0"
+APP_VERSION: Final[str] = "0.3.0"
 DEBUG: Final[bool] = True
 TIME_FMT: Final[str] = "%Y-%m-%d %H:%M:%S"
 
@@ -103,8 +103,8 @@ def get_logger(name: str, terminal: bool = True) -> logging.Logger:
 
         log_format = "%(asctime)s (%(name)-16s / line %(lineno)-4d) " + \
             "- %(levelname)-8s %(message)s"
-        max_log_size = 256 * 2**20
-        max_log_count = 4
+        max_log_size = 512 * 2**20
+        max_log_count = 8
 
         log_obj = logging.getLogger(name)
         log_obj.setLevel(logging.DEBUG)
