@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-03-06 16:26:52 krylon>
+# Time-stamp: <2024-08-06 17:50:05 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -13,12 +13,12 @@
   German Weather Service (Deutscher Wetterdienst, [[https://www.dwd.de/][DWD]]) and display them.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2024-03-06 Mi 16:26]
+   #+CAPTION: Clock summary at [2024-08-06 Di 17:49]
    | Headline                                       | Time       |            |          |       |      |
    |------------------------------------------------+------------+------------+----------+-------+------|
-   | *Total time*                                   | *4d 15:21* |            |          |       |      |
+   | *Total time*                                   | *4d 16:20* |            |          |       |      |
    |------------------------------------------------+------------+------------+----------+-------+------|
-   | *Wetterfrosch*                                 | *4d 15:21* |            |          |       |      |
+   | *Wetterfrosch*                                 | *4d 16:20* |            |          |       |      |
    | \_  /Features [5/6]/                           |            | /1d 21:48/ |          |       |      |
    | \_    More data [4/4]                          |            |            | 1d 20:08 |       |      |
    | \_      Forecast [3/3]                         |            |            |          |  7:33 |      |
@@ -26,7 +26,7 @@
    | \_        Database                             |            |            |          |       | 0:03 |
    | \_        GUI                                  |            |            |          |       | 6:21 |
    | \_    Graphs [0/0]                             |            |            |     1:40 |       |      |
-   | \_  /Components [15/16]/                       |            | /2d 12:06/ |          |       |      |
+   | \_  /Components [15/16]/                       |            | /2d 13:05/ |          |       |      |
    | \_    "main" [0/0]                             |            |            |     2:00 |       |      |
    | \_    Configuration [0/0]                      |            |            |     2:00 |       |      |
    | \_    Database [1/1]                           |            |            |    18:14 |       |      |
@@ -37,7 +37,8 @@
    | \_      Location                               |            |            |          |  1:33 |      |
    | \_      Testing                                |            |            |          |  0:41 |      |
    | \_      Read location list upon creation of... |            |            |          |  0:15 |      |
-   | \_    GUI [4/5]                                |            |            |    22:44 |       |      |
+   | \_    GUI [4/6]                                |            |            |    23:43 |       |      |
+   | \_      Humid                                  |            |            |          |  0:59 |      |
    | \_      Location management [1/1]              |            |            |          | 13:29 |      |
    | \_        Separate window class                |            |            |          |       | 0:01 |
    | \_      Non-blocking refresh                   |            |            |          |  3:26 |      |
@@ -124,7 +125,7 @@
     just perfect, however.
     My second candidate is matplotlib, which plotly uses behind the scenes.
     This seems to be closer to what I have in mind.
-** Components [15/16]
+** Components [16/18]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
   :VISIBILITY: children
@@ -253,7 +254,7 @@
      :LOGBOOK:
      CLOCK: [2024-02-17 Sa 14:42]--[2024-02-17 Sa 14:57] =>  0:15
      :END:
-*** GUI [4/5]
+*** GUI [5/6]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -266,6 +267,15 @@
    CLOCK: [2024-01-03 Mi 17:21]--[2024-01-03 Mi 19:15] =>  1:54
    CLOCK: [2024-01-02 Di 19:41]--[2024-01-02 Di 19:51] =>  0:10
    :END:
+**** DONE Humid
+     CLOSED: [2024-08-06 Di 17:49]
+     :LOGBOOK:
+     CLOCK: [2024-08-06 Di 17:01]--[2024-08-06 Di 17:49] =>  0:48
+     CLOCK: [2024-08-06 Di 14:55]--[2024-08-06 Di 15:06] =>  0:11
+     :END:
+     I would like to display in the forecast view whether the the combination
+     of temperature and humidity makes it schwül. I already to that elsewhere,
+     so it should not be a big deal.
 **** TODO Fetch interval
      I would like to edit the Client's fetch interval and make changes to it
      persistent. And now that I think about it, I should really think about
