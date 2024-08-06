@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-17 16:16:59 krylon>
+# Time-stamp: <2024-08-06 17:38:34 krylon>
 #
 # /data/code/python/wetterfrosch/test_data.py
 # created on 01. 02. 2024
@@ -39,8 +39,7 @@ class WarningTest(unittest.TestCase):
     """Test the parsing of weather data."""
 
     def test_read_file(self) -> None:
-        """Try to read a JSON chunk as returned by the DWD server
-        from a file."""
+        """Try to read a JSON chunk as returned by the DWD server from a file."""
         if not krylib.fexist(example_warning):
             self.skipTest("Sample JSON file not found")
         with open(example_warning, "r", encoding="utf-8") as fh:

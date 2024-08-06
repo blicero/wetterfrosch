@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-15 16:39:16 krylon>
+# Time-stamp: <2024-08-06 17:37:44 krylon>
 #
 # /data/code/python/wetterfrosch/wetterfrosch.py
 # created on 14. 02. 2024
@@ -27,7 +27,7 @@ from wetterfrosch import client, common, gui
 
 
 def main() -> None:
-    """The entry point to the application."""
+    """The entry point to the application."""  # noqa: D401
     argp: argparse.ArgumentParser = argparse.ArgumentParser()
     argp.add_argument("-g", "--gui",
                       action="store_true",

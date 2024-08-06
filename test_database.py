@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # pylint: disable-msg=C0302
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-08 19:24:55 krylon>
+# Time-stamp: <2024-08-06 17:38:31 krylon>
 #
 # /data/code/python/wetterfrosch/test_database.py
 # created on 13. 01. 2024
@@ -45,7 +45,7 @@ class DatabaseTest(unittest.TestCase):
     db: database.Database
 
     @classmethod
-    def setUpClass(cls) -> None:
+    def setUpClass(cls) -> None:  # noqa: D102
         stamp = datetime.now()
         folder_name = \
             stamp.strftime("wetterfrosch_test_database_%Y%m%d_%H%M%S")
@@ -54,7 +54,7 @@ class DatabaseTest(unittest.TestCase):
         common.set_basedir(cls.folder)
 
     @classmethod
-    def tearDownClass(cls) -> None:
+    def tearDownClass(cls) -> None:  # noqa: D102
         os.system(f"/bin/rm -rf {cls.folder}")
 
     def __get_db(self) -> database.Database:

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-17 16:37:08 krylon>
+# Time-stamp: <2024-08-06 17:38:05 krylon>
 #
 # /data/code/python/wetterfrosch/data.py
 # created on 12. 01. 2024
@@ -64,8 +64,7 @@ humid_table: Final[dict[int, int]] = {
 
 # pylint: disable-msg=R0902,R0903
 class WeatherWarning:
-    """Represents a warning issued by the DWD about severe
-    weather conditions."""
+    """Represents a warning issued by the DWD about severe weather conditions."""
 
     __slots__ = [
         "wid",
@@ -138,8 +137,7 @@ class WeatherWarning:
 
 
 class Datapoint:
-    """A Datapoint is part of a weather forecast and includes conditions
-    predicted for some point in the future."""
+    """A Datapoint is part of a weather forecast for some point in the future."""
 
     # rain_amt is millimeters of rain per square meter per hour
 
@@ -284,8 +282,7 @@ class Forecast:
         return fc
 
     def hourly_db(self) -> list[tuple]:
-        """Return a list of tuples, one for each Datapoint of forecast,
-        suitable for feeding to the database."""
+        """Return a list of tuples, one for each Datapoint of forecast."""
         res = []
         for h in self.hourly:
             t = (self.fid,
@@ -315,8 +312,7 @@ class Forecast:
         return humid
 
     def icon_name(self) -> str:
-        """Attempt to guess the name of the appropriate icon to display for
-        the weather forecast."""
+        """Attempt to guess the name of the appropriate icon for the weather forecast."""
         return f"weather-{self.icon}-symbolic"
 
 # local Variables: #

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-03-06 16:26:08 krylon>
+# Time-stamp: <2024-08-06 17:42:59 krylon>
 #
 # /data/code/python/wetterfrosch/chart.py
 # created on 19. 02. 2024
@@ -23,13 +23,13 @@ import logging
 from datetime import datetime
 from threading import Lock, local
 
-import matplotlib.pyplot as plt
-import matplotlib as mpl
+import matplotlib.pyplot as plt  # noqa: F401  pylint: disable-msg=W0611
+import matplotlib as mpl  # noqa: F401  pylint: disable-msg=W0611
 
-from wetterfrosch import common, data, database
+from wetterfrosch import common, data, database  # noqa: F401  pylint: disable-msg=W0611
 
 
-class Plotter:
+class Plotter:  # pylint: disable-msg=R0903
     """Plotter generates charts from the data we got from the web."""
 
     __slots__ = [
@@ -42,7 +42,7 @@ class Plotter:
     log: logging.Logger
     tls: local
 
-    def __init__(self) -> None:
+    def __init__(self) -> None:  # noqa: D107
         self.log = common.get_logger("chart")
         self.lock = Lock()
         self.tls = local()
@@ -50,10 +50,10 @@ class Plotter:
     def _get_db(self) -> database.Database:
         """Get the Database instance for the calling thread."""
         try:
-            return self.local.db
+            return self.tls.db
         except AttributeError:
             db = database.Database()  # pylint: disable-msg=C0103
-            self.local.db = db
+            self.tls.db = db
             return db
 
     def render_chart(self, d1: datetime, d2: datetime, path: str) -> None:

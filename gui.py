@@ -209,7 +209,7 @@ class WetterGUI:
         self.fc_lbl_temp: gtk.Label = gtk.Label.new("Temperatur")
         self.fc_lbl_humid: gtk.Label = gtk.Label.new("Luftfeuchtigkeit")
         self.fc_lbl_wind: gtk.Label = gtk.Label.new("Windgeschwindigkeit")
-        self.fc_lbl_schwül: gtk.Label = gtk.Label.new("Schwül")
+        self.fc_lbl_damp: gtk.Label = gtk.Label.new("Schwül")
         self.fc_view_time: gtk.TextView = gtk.TextView.new()
         self.fc_view_loc: gtk.TextView = gtk.TextView.new()
         self.fc_view_summary: gtk.TextView = gtk.TextView.new()
@@ -217,7 +217,7 @@ class WetterGUI:
         self.fc_view_temp: gtk.TextView = gtk.TextView.new()
         self.fc_view_humid: gtk.TextView = gtk.TextView.new()
         self.fc_view_wind: gtk.TextView = gtk.TextView.new()
-        self.fc_view_schwül: gtk.TextView = gtk.TextView.new()
+        self.fc_view_damp: gtk.TextView = gtk.TextView.new()
 
         fc_labels: tuple[gtk.Label, ...] = (
             self.fc_lbl_time,
@@ -227,7 +227,7 @@ class WetterGUI:
             self.fc_lbl_temp,
             self.fc_lbl_humid,
             self.fc_lbl_wind,
-            self.fc_lbl_schwül,
+            self.fc_lbl_damp,
         )
 
         for lbl in fc_labels:
@@ -241,7 +241,7 @@ class WetterGUI:
             self.fc_view_temp,
             self.fc_view_humid,
             self.fc_view_wind,
-            self.fc_view_schwül,
+            self.fc_view_damp,
         )
 
         for v in fc_views:

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-20 14:20:24 krylon>
+# Time-stamp: <2024-08-06 17:37:20 krylon>
 #
 # /data/code/python/wetterfrosch/database.py
 # created on 13. 01. 2024
@@ -124,6 +124,7 @@ CREATE TABLE hourly (
 # pylint: disable-msg=C0103
 class Query(Enum):
     """Symbolic constants to identify database queries"""
+
     WarningAdd = auto()
     WarningGetByPeriod = auto()
     WarningGetAll = auto()
@@ -330,8 +331,7 @@ ORDER BY timestamp
 
 
 class Database:
-    """Database provides a wrapper around the, uh, database connection
-    and exposes the operations to be performed on it."""
+    """Database provides a wrapper around the, uh, database connection."""
 
     __slots__ = [
         "db",
@@ -370,10 +370,10 @@ class Database:
                 cur.execute(query)
         self.log.debug("Database initialized successfully.")
 
-    def __enter__(self) -> None:
+    def __enter__(self) -> None:  # noqa: D105
         self.db.__enter__()
 
-    def __exit__(self, ex_type, ex_val, traceback):
+    def __exit__(self, ex_type, ex_val, traceback):  # noqa: D105
         return self.db.__exit__(ex_type, ex_val, traceback)
 
     def warning_add(self, w: WeatherWarning) -> None:
@@ -405,7 +405,9 @@ class Database:
 
     def warning_get_all(self) -> list[WeatherWarning]:
         """Fetch all warnings from the database.
-        Caveat programmor."""
+
+        Caveat programmor.
+        """
         cur: Final[sqlite3.Cursor] = self.db.cursor()
         cur.execute(db_queries[Query.WarningGetAll])
         results: list[WeatherWarning] = []

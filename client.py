@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-02-19 18:12:43 krylon>
+# Time-stamp: <2024-08-06 17:37:56 krylon>
 #
 # /data/code/python/wetterfrosch/dwd.py
 # created on 28. 12. 2023
@@ -75,7 +75,9 @@ class LocationList:
     @classmethod
     def new(cls, *patterns: Union[str, re.Pattern]) -> Any:
         """Return the singleton instance.
-        If it has not been created yet, create it and return it."""
+
+        If it has not been created yet, create it and return it.
+        """
         with cls.clock:
             if cls._instance is None:
                 print("Creating singleton instance.")
@@ -117,8 +119,7 @@ class LocationList:
             self.patterns = []
 
     def add(self, item: Union[str, re.Pattern]) -> None:
-        """Add a new pattern. If <item> is a string, it is compiled to
-        a re.Pattern"""
+        """Add a new pattern. If <item> is a string, it is compiled to a re.Pattern."""
         with self.lock:
             if isinstance(item, str):
                 if item not in self.dupes:
@@ -133,14 +134,15 @@ class LocationList:
 
     def replace(self, items: list[str]) -> None:
         """Replace the patterns in the LocationList.
-        Assumes that all strings in items are valid regular expressions."""
+
+        Assumes that all strings in items are valid regular expressions.
+        """
         with self.lock:
             self.patterns = [re.compile(p, re.I) for p in items]
             self.dupes = set(items)
 
     def check(self, loc: str) -> bool:
-        """Check if the given string is matched by any of the List's
-        regular expressions."""
+        """Check if the given string is matched by any of the List's regular expressions."""
         with self.lock:
             if len(self.patterns) == 0:
                 return True
@@ -245,8 +247,7 @@ class Client:
             return self.active
 
     def stop(self) -> None:
-        """Clear the Client's active flag, causing its associated
-        workers to exit."""
+        """Clear the Client's active flag, causing its associated workers to exit."""
         with self.lock:
             self.active = False
 
