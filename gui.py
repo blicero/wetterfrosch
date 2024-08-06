@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-04-06 17:38:36 krylon>
+# Time-stamp: <2024-08-06 17:45:53 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -147,6 +147,7 @@ class WetterGUI:
             (7, "Wind (m/s)"),
             (8, "% Bedeckt"),
             (9, "Sichtweite"),
+            (10, "Schwül?"),
         ]
 
         self.fc_store = gtk.ListStore(
@@ -160,6 +161,7 @@ class WetterGUI:
             int,        # 7, Wingeschwindigkeit
             int,        # 8, % Bedeckt
             float,      # 9, Sichtweite
+            str,        # 10, Schwül?
         )
 
         self.win = gtk.Window()
@@ -285,8 +287,8 @@ class WetterGUI:
         self.fc_grid.attach(self.fc_view_loc, 3, 0, 1, 1)
         self.fc_grid.attach(self.fc_lbl_summary, 4, 0, 1, 1)
         self.fc_grid.attach(self.fc_view_summary, 5, 0, 1, 1)
-        self.fc_grid.attach(self.fc_lbl_schwül, 6, 0, 1, 1)
-        self.fc_grid.attach(self.fc_view_schwül, 7, 0, 1, 1)
+        self.fc_grid.attach(self.fc_lbl_damp, 6, 0, 1, 1)
+        self.fc_grid.attach(self.fc_view_damp, 7, 0, 1, 1)
         self.fc_grid.attach(self.fc_lbl_temp, 0, 1, 1, 1)
         self.fc_grid.attach(self.fc_view_temp, 1, 1, 1, 1)
         self.fc_grid.attach(self.fc_lbl_humid, 2, 1, 1, 1)
@@ -445,14 +447,14 @@ class WetterGUI:
                     f"{fc.probability_rain} %")
                 self.fc_store.clear()
                 if fc.is_humid():
-                    self.fc_view_schwül.get_buffer().set_text("SCHWÜL!!!!")
+                    self.fc_view_damp.get_buffer().set_text("SCHWÜL!!!!")
                 else:
-                    self.fc_view_schwül.get_buffer().set_text("eher nicht")
+                    self.fc_view_damp.get_buffer().set_text("eher nicht")
                 for p in fc.hourly:
                     fiter = self.fc_store.append()
                     self.fc_store.set(
                         fiter,
-                        (0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
+                        (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
                         (
                             p.pid,
                             p.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
@@ -464,6 +466,7 @@ class WetterGUI:
                             p.wind_speed,
                             p.cloud_cover,
                             p.visibility,
+                            "SCHWÜL" if p.is_humid() else "",
                         ))
             else:
                 self.log.error("Client did not return forecast data")
