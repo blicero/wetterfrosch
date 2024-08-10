@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-08-06 17:45:53 krylon>
+# Time-stamp: <2024-08-10 14:31:09 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -140,7 +140,7 @@ class WetterGUI:
             (0, "ID"),
             (1, "Zeitpunkt"),
             (2, "% Regen"),
-            (3, "Regenmenge"),
+            (3, "Regenmenge (l/m²)"),
             (4, "Temperatur"),
             (5, "Luftfeuchtigkeit"),
             (6, "Luftdruck"),
@@ -459,13 +459,13 @@ class WetterGUI:
                             p.pid,
                             p.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
                             p.probability_rain,
-                            p.rain_amt,
+                            f"{p.rain_amt:.1f}",
                             f"{p.temperature} °C",
                             f"{p.humidity} %",
-                            p.pressure,
+                            f"{p.pressure:.1f} pa",
                             p.wind_speed,
-                            p.cloud_cover,
-                            p.visibility,
+                            f"{p.cloud_cover} %",
+                            f"{p.visibility:.1f}km",
                             "SCHWÜL" if p.is_humid() else "",
                         ))
             else:
