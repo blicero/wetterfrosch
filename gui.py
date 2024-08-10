@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-08-10 14:31:09 krylon>
+# Time-stamp: <2024-08-10 14:38:08 krylon>
 #
 # /data/code/python/wetterfrosch/gui.py
 # created on 02. 01. 2024
@@ -154,13 +154,13 @@ class WetterGUI:
             int,        # 0, ID
             str,        # 1, Zeitpunkt
             int,        # 2, % Regen
-            float,      # 3, Regenmenge
+            str,        # 3, Regenmenge
             str,        # 4, Temperatur
             str,        # 5, Luftfeuchtigkeit
-            float,      # 6, Luftdruck
+            str,        # 6, Luftdruck
             int,        # 7, Wingeschwindigkeit
-            int,        # 8, % Bedeckt
-            float,      # 9, Sichtweite
+            str,        # 8, % Bedeckt
+            str,        # 9, Sichtweite
             str,        # 10, Schwül?
         )
 
