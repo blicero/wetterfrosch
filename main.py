@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-08-06 17:37:44 krylon>
+# Time-stamp: <2025-07-06 15:51:21 krylon>
 #
 # /data/code/python/wetterfrosch/wetterfrosch.py
 # created on 14. 02. 2024
@@ -18,6 +18,7 @@ wetterfrosch.wetterfrosch
 """
 
 import argparse
+import os
 import time
 from typing import Final
 
@@ -57,6 +58,8 @@ def main() -> None:
     c.start()
 
     if args.gui:
+        if not "DISPLAY" in os.environ:
+            os.environ["DISPLAY"] = ":0.0"
         g: gui.WetterGUI = gui.WetterGUI(c)
         g.run()
     else:

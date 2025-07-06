@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: <2024-08-06 17:32:19 krylon>
+# Time-stamp: <2025-07-06 15:51:52 krylon>
 #
 # /data/code/python/wetterfrosch/__init__.py
 # created on 28. 12. 2023
@@ -28,9 +28,10 @@
 # SUCH DAMAGE.
 
 
-"""wetterfrosh.__init__.
+"""
+wetterfrosch.__init__
 
-(c) 2023 Benjamin Walkenhorst
+(c) 2024 Benjamin Walkenhorst
 """
 
 # Local Variables: #
